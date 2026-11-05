@@ -113,15 +113,17 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
 }
 
 /* Home: the covers. */
-.covers { --row: 250px; display: flex; flex-wrap: wrap; gap: clamp(22px, 3.6vw, 44px) var(--gap); }
-.covers::after { content: ""; flex: 1e4 1 0; } /* last row keeps the row height instead of stretching */
-@media (max-width: 1180px) { .covers { --row: 200px; } }
-@media (max-width: 520px) { .covers { display: grid; grid-template-columns: 1fr; } }
-/* Each cover keeps its own shape; within a row all share one height (widths are proportional to the ratio). */
-.cover { display: grid; gap: 9px; flex: calc(var(--r) * 100) 1 calc(var(--r) * var(--row)); align-content: start; }
-.cover .ph { aspect-ratio: var(--r); overflow: hidden; background: var(--line); }
-.cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--ease); }
-.cover .t { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+/* Every cover hangs in the same box, matted: the photograph keeps its own shape inside a fixed frame, never cropped. */
+.covers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 3.6vw, 44px) var(--gap); }
+@media (max-width: 1180px) { .covers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .covers { grid-template-columns: 1fr; } }
+.cover { display: grid; gap: 9px; }
+.cover .ph { aspect-ratio: 4 / 3; position: relative; }
+/* The image is laid over the frame (so its intrinsic size cannot stretch the box) and letterboxes itself
+   inside it; the frame is the page itself, drop-shadow follows the picture. */
+.cover img { position: absolute; inset: 7%; width: 86%; height: 86%; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .16)); transition: transform .7s var(--ease); }
+/* A wall label under each frame: title, then count and year, centred. */
+.cover .t { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 10px; row-gap: 2px; font-size: 13px; text-align: center; }
 .cover .t .name { transition: color .15s; }
 .cover .t .n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 300; font-size: 12px; }
 @media (hover: hover) { .cover:hover img { transform: scale(1.025); } }
@@ -153,12 +155,11 @@ img[loading] { opacity: 1; }
 .fig img:not(.is-loaded), .cover img:not(.is-loaded), .grid img:not(.is-loaded) { opacity: 0; }
 
 /* Recent + about */
-.grid { --row: 220px; display: flex; flex-wrap: wrap; gap: clamp(6px, 1vw, 12px); }
-.grid::after { content: ""; flex: 1e4 1 0; }
-@media (max-width: 1180px) { .grid { --row: 180px; } }
-@media (max-width: 560px) { .grid { --row: 120px; } }
-.grid a { display: block; flex: calc(var(--r) * 100) 1 calc(var(--r) * var(--row)); aspect-ratio: var(--r); overflow: hidden; background: var(--line); }
-.grid img { width: 100%; height: 100%; object-fit: cover; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1vw, 12px); }
+@media (max-width: 1180px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.grid a { display: block; aspect-ratio: 1; position: relative; }
+.grid img { position: absolute; inset: 8%; width: 84%; height: 84%; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .14)); }
 .prose { max-width: var(--measure); display: grid; gap: 16px; font-size: 14px; font-weight: 300; }
 .prose .m { color: var(--muted); font-size: 13px; }
 .prose a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }

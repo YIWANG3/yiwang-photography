@@ -8,7 +8,7 @@ const items = recentIds.map(itemById).filter(Boolean);
   <h1 class="page-title">Recent</h1>
   <div class="grid">
     {items.map((it, i) => (
-      <a href={`/${it.gallery.slug}/`} title={it.gallery.title} style={`--r:${(it.w / it.h).toFixed(4)}`}>
+      <a href={`/${it.gallery.slug}/`} title={it.gallery.title}>
         <Pic item={it} sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 25vw" alt={it.gallery.title} loading={i < 8 ? "eager" : "lazy"} />
       </a>
     ))}

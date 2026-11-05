@@ -2,17 +2,23 @@
 import Base from "../layouts/Base.astro";
 import Pic from "../components/Pic.astro";
 import { galleries, itemById } from "../lib/data.js";
+// The year most of a series was taken, when its photographs carry dates (galleries.yaml's year wins).
+function yearOf(items) {
+  const n = new Map();
+  for (const it of items) { const y = (it.exif?.taken || it.taken || "").slice(0, 4); if (/^\d{4}$/.test(y)) n.set(y, (n.get(y) ?? 0) + 1); }
+  return [...n].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
 ---
 <Base current="work">
   <div class="covers">
     {galleries.map((g, i) => {
       const cover = itemById(g.cover) ?? g.items[0];
       return (
-        <a class="cover" href={`/${g.slug}/`} style={`--r:${(cover.w / cover.h).toFixed(4)}`}>
+        <a class="cover" href={`/${g.slug}/`}>
           <div class="ph">
             <Pic item={cover} sizes="(max-width: 520px) 100vw, (max-width: 1180px) 50vw, 36vw" alt={g.title} loading={i < 3 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
           </div>
-          <div class="t"><span class="name">{g.title}</span><span class="n">{g.year ? `${g.year} · ` : ""}{g.count}</span></div>
+          <div class="t"><span class="name">{g.title}</span><span class="n">{[`${g.count} photographs`, g.year ?? yearOf(g.items)].filter(Boolean).join(" · ")}</span></div>
         </a>
       );
     })}
