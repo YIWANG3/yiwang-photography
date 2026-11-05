@@ -7,3 +7,5 @@ site/src/data/manifest.json
 .env*
 .DS_Store
 .claude/
+!.env.example
+.wrangler/

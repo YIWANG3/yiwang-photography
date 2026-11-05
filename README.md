@@ -12,6 +12,15 @@ npm run render               # originals → site/public/i/<id>/<w>.webp + site/
 npm run dev                  # http://127.0.0.1:4321
 ```
 
+## Deploy
+
+```bash
+npm run deploy               # images → R2, astro build against the CDN, dist → Cloudflare Pages
+```
+
+Needs the root `.env` (see `.env.example`) and `npx wrangler login`. Setup, domain move and the
+mainland-reachability check are in `docs/deploy.md`.
+
 `content/galleries.yaml` decides which series exist, their order, titles and `tone` (light / dark page).
 Camera data is mocked until the AfterFrame source replaces the Squarespace one (`manifest.site.exif_mock`).
 

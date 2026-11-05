@@ -2,7 +2,8 @@
 // build fetches it; locally `publish render` writes it here. Either way the shape is publisher/src/manifest.mjs.
 import manifest from "../data/manifest.json";
 
-export const site = manifest.site;
+// PUBLIC_IMAGE_BASE (set by `publish deploy`) points the build at the image CDN; the manifest's own value is for dev.
+export const site = { ...manifest.site, image_base: import.meta.env.PUBLIC_IMAGE_BASE || manifest.site.image_base };
 export const galleries = manifest.galleries.filter((g) => !g.hidden);
 export const allGalleries = manifest.galleries;
 export const recentIds = manifest.recent;

@@ -1,0 +1,5 @@
+# Cloudflare Pages project for the site. Deploys are direct uploads from `npm run deploy`
+# (publisher/src/deploy.mjs), not Git-integrated builds, because manifest.json and the images are not in git.
+name = "yiwang-photography"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "site/dist"

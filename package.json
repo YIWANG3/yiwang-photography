@@ -2,13 +2,23 @@
   "name": "yiwang-photography",
   "private": true,
   "type": "module",
-  "workspaces": ["site", "publisher"],
-  "engines": { "node": ">=22" },
+  "workspaces": [
+    "site",
+    "publisher"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "import:squarespace": "node publisher/bin/publish.mjs import-squarespace",
     "render": "node publisher/bin/publish.mjs render",
+    "sync-images": "node publisher/bin/publish.mjs sync-images",
+    "deploy": "node publisher/bin/publish.mjs deploy",
     "dev": "npm run dev -w site",
     "build": "npm run build -w site",
     "preview": "npm run preview -w site"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
   }
 }
