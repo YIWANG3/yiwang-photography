@@ -45,7 +45,13 @@ async function init() {
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   const thumbs = new Map();
-  const loadThumb = (url) => thumbs.get(url) ?? thumbs.set(url, new Promise((res) => { const im = new Image(); im.decoding = "async"; im.onload = () => res(im); im.onerror = () => res(null); im.src = url; })).get(url);
+  // Thumbnails are drawn onto a canvas, so a CDN-hosted image must be fetched with CORS (the R2 bucket allows
+  // the site's origins); without it the canvas would be tainted and the icon could not be exported.
+  const loadThumb = (url) => thumbs.get(url) ?? thumbs.set(url, new Promise((res) => {
+    const im = new Image(); im.decoding = "async";
+    if (new URL(url, location.href).origin !== location.origin) im.crossOrigin = "anonymous";
+    im.onload = () => res(im); im.onerror = () => res(null); im.src = url;
+  })).get(url);
 
   function ring() { return isDark() ? "#2a2b2e" : "#ffffff"; }
   function badge() { return isDark() ? ["#f7f6f3", "#1b1b1a"] : ["#1b1b1a", "#ffffff"]; }
@@ -59,6 +65,9 @@ async function init() {
   async function thumbIcon(url, size, count) {
     const im = await loadThumb(url);
     if (!im) return dotIcon(size);
+    try { return drawThumb(im, size, count); } catch { return dotIcon(size); }
+  }
+  function drawThumb(im, size, count) {
     const pad = count ? 8 : 0, W = size + pad; // room for the badge on clusters
     const c = document.createElement("canvas"); c.width = c.height = W * DPR;
     const x = c.getContext("2d"); x.scale(DPR, DPR);
