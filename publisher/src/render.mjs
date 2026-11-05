@@ -24,7 +24,8 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
   const overrides = await readOnsiteOverrides(cacheDir);
 
   const galleries = [];
-  const recent = [];
+  const recent = []; // first photos of each series, used until capture times are known
+  const dated = []; // every visible photo with a capture time
   let rendered = 0, reused = 0, mocked = 0;
 
   for (const g of config.galleries) {
@@ -66,7 +67,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
         alt: it.alt && !/\.(jpe?g|png)$/i.test(it.alt) ? it.alt : "",
         exif: real?.exif ?? (isMock ? mockExif(id, g) : null),
         geo: real?.geo ?? (isMock ? mockGeo(id, g) : null),
-        place: real?.place ?? null,
+        place: real?.place ?? (real ? g.place ?? null : null), // the series' place stands in when the photo has no address
         taken: real?.taken ?? null,
         mock: isMock,
       };
@@ -79,6 +80,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
       hidden: g.hidden ?? false, cover: coverId ?? items[0].id, count: items.length, items,
     });
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
+    if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken })));
     log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${items.filter((it) => it.geo && !it.mock).length} with real location`);
   }
 
@@ -87,7 +89,8 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     generated_at: new Date().toISOString(),
     site: { title: config.site.title, image_base: imageBase, exif_mock: mocked > 0, geo_mock: mocked > 0, links: config.site.links },
     galleries,
-    recent,
+    // Recent = the newest photographs by capture time once most of the archive carries one.
+    recent: [...new Set(dated.length >= recent.length ? dated.sort((a, b) => b.taken.localeCompare(a.taken)).map((d) => d.id) : recent)].slice(0, 36),
   });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 1));
   const all = galleries.flatMap((g) => g.items);

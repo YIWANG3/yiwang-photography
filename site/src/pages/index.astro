@@ -18,7 +18,7 @@ function yearOf(items) {
           <div class="ph">
             <Pic item={cover} sizes="(max-width: 520px) 100vw, (max-width: 1180px) 50vw, 36vw" alt={g.title} loading={i < 3 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
           </div>
-          <div class="t"><span class="name">{g.title}</span><span class="n">{[`${g.count} photographs`, g.year ?? yearOf(g.items)].filter(Boolean).join(" · ")}</span></div>
+          <div class="t"><span class="name">{g.title}</span><span class="n">{[g.count, g.year ?? yearOf(g.items)].filter(Boolean).join(" · ")}</span></div>
         </a>
       );
     })}

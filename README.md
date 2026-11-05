@@ -9,6 +9,7 @@ AfterFrame stays read-only: it is where photos are selected; everything about pu
 npm install
 npm run import:squarespace   # one-time: pulls the current Squarespace galleries into .cache/originals (2500 px, no EXIF)
 npm run import:onsite        # one-time: the on-site.photos archive (real GPS, address, EXIF) → .cache/originals/on-site
+npm run import:originals     # find each gallery photo's exported original on local disks (Spotlight + hash) and keep its EXIF
 npm run render               # originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock for placeholders)
 npm run dev                  # http://127.0.0.1:4321
 ```

@@ -103,7 +103,7 @@ function placeOf(ex, geo) {
   return parts[0] || geo.name || null;
 }
 
-function exifOf(ex, taken) {
+export function exifOf(ex, taken) {
   const camera = ex.model ? (ex.make && !ex.model.startsWith(ex.make) ? `${ex.make} ${ex.model}` : ex.model) : null;
   const out = {
     camera, lens: ex.lens || undefined,
@@ -119,7 +119,7 @@ function exifOf(ex, taken) {
 
 const shutterOf = (t) => (t >= 1 ? `${+t.toFixed(1)}"` : `1/${Math.round(1 / t)}`);
 const round = (n) => +n.toFixed(5);
-function isoFromExif(s) { // "2021:11:13 15:13:00" or already ISO
+export function isoFromExif(s) { // "2021:11:13 15:13:00" or already ISO
   const m = String(s).match(/^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`;
   const d = new Date(s); return Number.isNaN(+d) ? null : d.toISOString();
@@ -131,7 +131,7 @@ export async function dhash(file) {
   for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) bits[y * 16 + x] = data[y * 17 + x] < data[y * 17 + x + 1] ? 1 : 0;
   return bits;
 }
-const hamming = (a, b) => { let n = 0; for (let i = 0; i < a.length; i++) n += a[i] ^ b[i]; return n; };
+export const hamming = (a, b) => { let n = 0; for (let i = 0; i < a.length; i++) n += a[i] ^ b[i]; return n; };
 
 function parseEnv(text) {
   const out = {};

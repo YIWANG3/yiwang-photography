@@ -12,6 +12,7 @@
   "scripts": {
     "import:squarespace": "node publisher/bin/publish.mjs import-squarespace",
     "import:onsite": "node publisher/bin/publish.mjs import-onsite",
+    "import:originals": "node publisher/bin/publish.mjs import-originals",
     "render": "node publisher/bin/publish.mjs render",
     "sync-images": "node publisher/bin/publish.mjs sync-images",
     "deploy": "node publisher/bin/publish.mjs deploy",
