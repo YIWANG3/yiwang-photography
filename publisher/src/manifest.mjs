@@ -6,7 +6,7 @@ export const Tone = z.enum(["light", "dark"]);
 export const Link = z.object({
   label: z.string().min(1),
   url: z.string().url(),
-  icon: z.enum(["instagram", "xiaohongshu", "map", "afterframe", "link"]).default("link"),
+  icon: z.enum(["instagram", "xiaohongshu", "douyin", "map", "afterframe", "link"]).default("link"),
 });
 
 export const GalleriesConfig = z.object({

@@ -33,27 +33,31 @@ async function init() {
     styles: isDark() ? DARK : LIGHT,
     backgroundColor: isDark() ? "#101214" : "#dde3e6",
     disableDefaultUI: true,
-    zoomControl: true,
+    zoomControl: matchMedia("(hover: hover)").matches, // phones pinch; the buttons would sit under the photo panel
     gestureHandling: "greedy",
     clickableIcons: false,
   });
   // Follow the theme toggle without reloading.
   new MutationObserver(() => {
     map.setOptions({ styles: isDark() ? DARK : LIGHT, backgroundColor: isDark() ? "#101214" : "#dde3e6" });
-    for (const m of markers) m.setIcon(dotIcon(PIN));
-    iconCache.clear(); scheduleIcons();
+    iconCache.clear();
+    for (const m of markers) { m.__iconKey = null; if (m.getMap()) wantIcon(m, m.__p.thumb, PIN); }
+    for (const m of clusterMarkers) { m.__iconKey = null; wantIcon(m, m.__thumb, CLUSTER, m.__count); }
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  const thumbs = new Map();
   // Thumbnails are drawn onto a canvas, so a CDN-hosted image must be fetched with CORS (the R2 bucket allows
   // the site's origins); without it the canvas would be tainted and the icon could not be exported.
   // The gallery pages load the same files without CORS and the browser may reuse that cached response for a
   // CORS request and fail it, so the canvas copy uses its own URL (a query string, which R2 ignores).
+  // `ready` holds decoded images so a cluster that appears later can get its icon synchronously, in the same
+  // frame it is created; a failed load is forgotten so the next request retries instead of staying a dot.
+  const thumbs = new Map(), ready = new Map();
   const loadThumb = (url) => thumbs.get(url) ?? thumbs.set(url, new Promise((res) => {
     const im = new Image(); im.decoding = "async";
     const cross = new URL(url, location.href).origin !== location.origin;
     if (cross) im.crossOrigin = "anonymous";
-    im.onload = () => res(im); im.onerror = () => res(null);
+    im.onload = () => { ready.set(url, im); res(im); };
+    im.onerror = () => { thumbs.delete(url); res(null); };
     im.src = cross ? `${url}${url.includes("?") ? "&" : "?"}canvas` : url;
   })).get(url);
 
@@ -92,24 +96,47 @@ async function init() {
     return { url: c.toDataURL(), scaledSize: new google.maps.Size(W, W), anchor: new google.maps.Point(size / 2, size / 2 + pad) };
   }
 
-  // Icons are drawn lazily so 235 thumbnails never block the first paint.
+  // Icons are cached per (image, size, badge, theme). A marker whose image is already decoded gets its
+  // thumbnail at once; the others start as a dot and swap as soon as the image arrives.
   const iconCache = new Map();
-  const pending = new Set();
-  let rafId = 0;
-  function scheduleIcons() { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(drainIcons); }
-  async function drainIcons() {
-    for (const job of [...pending]) { pending.delete(job); await job(); }
+  function cachedIcon(url, size, count) {
+    const k = `${url}|${size}|${count ?? 0}|${isDark()}`;
+    let ic = iconCache.get(k);
+    if (!ic) {
+      const im = ready.get(url);
+      if (!im) return null;
+      try { ic = drawThumb(im, size, count); } catch { ic = dotIcon(size); }
+      iconCache.set(k, ic);
+    }
+    return ic;
   }
   function wantIcon(marker, url, size, count) {
     const k = `${url}|${size}|${count ?? 0}|${isDark()}`;
-    const hit = iconCache.get(k);
-    if (hit) { marker.setIcon(hit); return; }
-    pending.add(async () => { const ic = await thumbIcon(url, size, count); iconCache.set(k, ic); if (marker.getMap()) marker.setIcon(ic); });
-    scheduleIcons();
+    if (marker.__iconKey === k) return;
+    const hit = cachedIcon(url, size, count);
+    if (hit) { marker.__iconKey = k; marker.setIcon(hit); return; }
+    loadThumb(url).then((im) => {
+      if (!im || marker.__iconKey === k) return;
+      const ic = cachedIcon(url, size, count);
+      if (ic) { marker.__iconKey = k; marker.setIcon(ic); }
+    });
+  }
+  // Thumbnails of the points in view are decoded ahead, a few at a time, so zooming into an area finds them
+  // ready; nothing outside the view is fetched (334 photographs would be too much on a phone).
+  const warmQueue = []; let warming = 0;
+  function warm() {
+    const b = map.getBounds(); if (!b || map.getZoom() < 5) return; // the world view only needs one image per cluster
+    const seen = new Set();
+    warmQueue.length = 0;
+    for (const p of points) if (!ready.has(p.thumb) && !seen.has(p.thumb) && b.contains({ lat: p.lat, lng: p.lng })) { seen.add(p.thumb); warmQueue.push(p.thumb); }
+    while (warming < 6 && warmQueue.length) {
+      warming++;
+      loadThumb(warmQueue.shift()).then(() => { warming--; if (warmQueue.length) warm(); });
+    }
   }
 
   const markers = points.map((p) => {
-    const m = new google.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon: dotIcon(PIN), title: p.series, optimized: true });
+    const m = new google.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon: dotIcon(PIN), title: p.label, optimized: true });
     m.addListener("click", () => showStrip([p], p.label));
     m.__p = p;
     return m;
@@ -135,13 +162,18 @@ async function init() {
     });
   }
 
+  const clusterMarkers = new Set();
   new MarkerClusterer({
     map, markers,
     algorithm: new SuperClusterAlgorithm({ radius: 70, maxZoom: 16 }),
     renderer: {
       render({ count, position, markers: ms }) {
-        const m = new google.maps.Marker({ position, icon: dotIcon(CLUSTER), zIndex: 1000 + count, optimized: true });
-        wantIcon(m, ms[0].__p.thumb, CLUSTER, count);
+        const thumb = ms[0].__p.thumb;
+        const m = new google.maps.Marker({ position, icon: cachedIcon(thumb, CLUSTER, count) ?? dotIcon(CLUSTER), zIndex: 1000 + count, optimized: true });
+        m.__thumb = thumb; m.__count = count;
+        if (cachedIcon(thumb, CLUSTER, count)) m.__iconKey = `${thumb}|${CLUSTER}|${count}|${isDark()}`; else wantIcon(m, thumb, CLUSTER, count);
+        clusterMarkers.add(m);
+        m.addListener("map_changed", () => { if (!m.getMap()) clusterMarkers.delete(m); });
         return m;
       },
     },
@@ -154,15 +186,24 @@ async function init() {
       }
     },
   });
-  // Single markers get their thumbnail once they are actually on the map.
-  map.addListener("idle", () => { for (const m of markers) if (m.getMap() && !m.__thumbed) { m.__thumbed = true; wantIcon(m, m.__p.thumb, PIN); } });
+  // Single markers get their thumbnail once they are actually on the map (the clusterer takes them off while clustered).
+  // Clusters are asked again too: a thumbnail that failed to load the first time gets another chance.
+  map.addListener("idle", () => {
+    for (const m of markers) if (m.getMap()) wantIcon(m, m.__p.thumb, PIN);
+    for (const m of clusterMarkers) if (m.getMap()) wantIcon(m, m.__thumb, CLUSTER, m.__count);
+    warm();
+  });
 
   function showStrip(ps, title) {
     panelTitle.textContent = title;
     strip.replaceChildren(...ps.map((p, i) => {
       const b = document.createElement("button");
       b.type = "button";
-      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${p.label}" loading="lazy" decoding="async"><span>${p.label}</span>`;
+      // The header already says where; under each photo goes the series (or the month for map-only photos),
+      // or the place when the header is the series.
+      const cap = p.caption === title ? p.label : p.caption || p.label;
+      b.style.setProperty("--r", (p.w / p.h).toFixed(4));
+      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${p.label}" loading="lazy" decoding="async"><span>${cap}</span>`;
       b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: q.exif, alt: q.label, title: q.label })), i));
       return b;
     }));
@@ -184,7 +225,7 @@ async function init() {
   map.addListener("click", () => { panel.hidden = true; });
 
   instance = { page, map };
-  if (import.meta.env.DEV) window.__pmap = map; // dev only: lets us drive the map from the console
+  if (import.meta.env.DEV) Object.assign(window, { __pmap: map, __pmapDebug: { ready, thumbs, iconCache, markers, clusterMarkers } }); // dev only: lets us drive the map from the console
 }
 
 document.addEventListener("astro:page-load", init);

@@ -8,9 +8,9 @@ import { galleries, itemById } from "../lib/data.js";
     {galleries.map((g, i) => {
       const cover = itemById(g.cover) ?? g.items[0];
       return (
-        <a class="cover" href={`/${g.slug}/`}>
+        <a class="cover" href={`/${g.slug}/`} style={`--r:${(cover.w / cover.h).toFixed(4)}`}>
           <div class="ph">
-            <Pic item={cover} sizes="(max-width: 520px) 100vw, (max-width: 1180px) 50vw, 30vw" alt={g.title} loading={i < 3 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
+            <Pic item={cover} sizes="(max-width: 520px) 100vw, (max-width: 1180px) 50vw, 36vw" alt={g.title} loading={i < 3 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
           </div>
           <div class="t"><span class="name">{g.title}</span><span class="n">{g.year ? `${g.year} · ` : ""}{g.count}</span></div>
         </a>

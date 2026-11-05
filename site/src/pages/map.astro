@@ -8,7 +8,14 @@ import { allGalleries, site, src, detailLine } from "../lib/data.js";
 const points = allGalleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
   id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes,
   thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, label: it.place || g.title, exif: detailLine(it),
+  // Under a photo in the strip: its series, or for the map-only archive (no series to name) the month it was taken.
+  caption: g.hidden ? when(it) : g.title,
 })));
+function when(it) {
+  const ym = it.exif?.taken || (it.taken || "").slice(0, 7);
+  if (!/^\d{4}-\d{2}/.test(ym)) return "";
+  return new Date(`${ym}-15T00:00:00Z`).toLocaleDateString("en", { month: "short", year: "numeric", timeZone: "UTC" });
+}
 const key = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY ?? "";
 ---
 <Base title="Map" current="map" description="Where the photographs were taken.">

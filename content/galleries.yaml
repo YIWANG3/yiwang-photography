@@ -4,7 +4,7 @@
 # hidden: true keeps a gallery out of the index, home and Recent; its photos still appear on the map.
 site:
   title: yi.wang photography
-  # External links, in display order. icon is one of: instagram, xiaohongshu, map, afterframe, link
+  # External links, in display order. icon is one of: instagram, xiaohongshu, douyin, map, afterframe, link
   links:
     - label: Instagram
       url: https://www.instagram.com/yi.wang.123/
@@ -12,6 +12,9 @@ site:
     - label: 小红书
       url: https://www.xiaohongshu.com/user/profile/566bcae6b8ce1a2def8e47fa
       icon: xiaohongshu
+    - label: 抖音
+      url: https://www.douyin.com/user/MS4wLjABAAAA3UmSB3k8i75xRUVQDZALM63y1S9W5dQ6u-Z6CXv03Pg
+      icon: douyin
 
 galleries:
   - slug: tokyo-night
