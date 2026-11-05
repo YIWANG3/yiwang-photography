@@ -1,0 +1,36 @@
+---
+import { src, srcset, pick, exifLine } from "../lib/data.js";
+interface Props {
+  item: any;
+  sizes: string;
+  alt?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "auto";
+  class?: string;
+  lightbox?: boolean;
+  index?: number;
+}
+const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index } = Astro.props;
+const fallback = pick(item, 1200);
+const data = lightbox ? {
+  "data-lb-id": item.id,
+  "data-lb-sizes": item.sizes.join(","),
+  "data-lb-w": item.w,
+  "data-lb-h": item.h,
+  "data-lb-index": index,
+  "data-lb-exif": exifLine(item.exif).join(" · "),
+} : {};
+---
+<img
+  src={src(item, fallback)}
+  srcset={srcset(item)}
+  sizes={sizes}
+  width={item.w}
+  height={item.h}
+  alt={alt}
+  loading={loading}
+  fetchpriority={fetchpriority}
+  decoding="async"
+  class={cls}
+  {...data}
+/>

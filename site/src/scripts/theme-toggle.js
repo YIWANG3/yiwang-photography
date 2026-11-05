@@ -1,0 +1,63 @@
+// Theme: an explicit choice beats the page's tone, which beats the system setting.
+// Runs once (the index and topbar persist across client navigations) and re-applies after each swap.
+// Also marks images as loaded so they can fade in, and keeps the index's current item in sync.
+const root = document.documentElement;
+
+function apply() {
+  let pref = null;
+  try { pref = localStorage.getItem("theme"); } catch {}
+  const tone = root.dataset.tone;
+  const sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  root.dataset.theme = pref === "light" || pref === "dark" ? pref : tone === "dark" ? "dark" : sys;
+}
+
+function markCurrent() {
+  const current = document.querySelector("main")?.dataset.current;
+  for (const a of document.querySelectorAll("[data-slug]")) {
+    if (a.dataset.slug === current) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  }
+  closeSide();
+  // Keep the current series in view inside the index's own scroll area.
+  document.querySelector(`.index .series-list a[data-slug="${current}"]`)?.scrollIntoView({ block: "nearest" });
+}
+
+function watchImages() {
+  for (const img of document.querySelectorAll("main img:not(.is-loaded)")) {
+    if (img.complete && img.naturalWidth > 0) img.classList.add("is-loaded");
+    else img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+    img.addEventListener("error", () => img.classList.add("is-loaded"), { once: true });
+  }
+}
+
+// Mobile side panel (the index, slid in from the left).
+const side = document.getElementById("side");
+function openSide() {
+  if (!side) return;
+  side.dataset.open = "";
+  side.setAttribute("aria-hidden", "false");
+  root.classList.add("no-scroll");
+  side.querySelector('.series-list a[aria-current="page"]')?.scrollIntoView({ block: "center" });
+}
+function closeSide() {
+  if (!side || !("open" in side.dataset)) return;
+  delete side.dataset.open;
+  side.setAttribute("aria-hidden", "true");
+  root.classList.remove("no-scroll");
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-side-open]")) return openSide();
+  if (e.target.closest("[data-side-close]") || e.target.closest(".side a[href]")) closeSide();
+  if (!e.target.closest("[data-theme-toggle]")) return;
+  const next = root.dataset.theme === "dark" ? "light" : "dark";
+  root.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch {}
+});
+
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSide(); });
+document.addEventListener("astro:before-swap", closeSide);
+document.addEventListener("astro:after-swap", () => { apply(); markCurrent(); });
+document.addEventListener("astro:page-load", watchImages);
+markCurrent();
+watchImages();

@@ -1,0 +1,31 @@
+---
+import Base from "../layouts/Base.astro";
+import Lightbox from "../components/Lightbox.astro";
+import { galleries, site, src, exifLine } from "../lib/data.js";
+
+// Every published photo with a location, in series order. The map script reads this JSON; nothing is fetched.
+const points = galleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
+  id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes,
+  thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, exif: exifLine(it.exif).join(" · "),
+})));
+const key = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY ?? "";
+---
+<Base title="Map" current="map" description="Where the photographs were taken.">
+  <div class="map-page" data-points={JSON.stringify(points)} data-key={key} data-base={site.image_base}>
+    <div class="map-canvas" id="map" role="application" aria-label="Map of photographs"></div>
+    <div class="map-type" role="group" aria-label="Map type">
+      <button type="button" data-map-type="roadmap" aria-pressed="true">Map</button>
+      <button type="button" data-map-type="hybrid" aria-pressed="false">Satellite</button>
+    </div>
+    {!key && <div class="map-notice"><p>Google Maps key missing. Put <code>PUBLIC_GOOGLE_MAPS_KEY=…</code> in <code>site/.env</code> and restart the dev server.</p></div>}
+    <aside class="map-panel" id="map-panel" hidden>
+      <header><span class="map-panel-title" id="map-panel-title"></span><button type="button" class="ib" data-panel-close aria-label="Close">×</button></header>
+      <div class="map-strip" id="map-strip"></div>
+    </aside>
+    <div class="map-legend">{points.length} photographs{site.geo_mock && <span> · locations are placeholders in this prototype</span>}</div>
+  </div>
+  <Lightbox />
+  <script>
+    import "../scripts/map.js";
+  </script>
+</Base>

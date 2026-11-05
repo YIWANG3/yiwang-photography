@@ -1,0 +1,11 @@
+{
+  "name": "@yiwang/publisher",
+  "private": true,
+  "type": "module",
+  "bin": { "publish": "./bin/publish.mjs" },
+  "dependencies": {
+    "sharp": "^0.34.3",
+    "yaml": "^2.8.0",
+    "zod": "^3.25.76"
+  }
+}

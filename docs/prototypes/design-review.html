@@ -1,0 +1,409 @@
+<title>yiwang.photography 设计提案</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&display=swap">
+<style>
+/* Layout: a long-form proposal, 1120px column; the demo section holds a self-contained mini site in a resizable frame */
+:root{
+  --bg:#f4f4f2; --surface:#ffffff; --fg:#17191b; --muted:#6a7076; --line:#d9dbd7; --soft:#eceeea;
+  --accent:#2f5aa8; --ok:#2f7d4f; --warn:#a85d2f;
+  --font-ui:"Instrument Sans","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --font-demo:"Inter","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+  --radius:6px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#141617; --surface:#1c1f21; --fg:#e7e8e5; --muted:#8e949a; --line:#2c3033; --soft:#232729; --accent:#8fb0f0; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#141617; --surface:#1c1f21; --fg:#e7e8e5; --muted:#8e949a; --line:#2c3033; --soft:#232729; --accent:#8fb0f0; color-scheme:dark }
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:15px;line-height:1.65;padding-inline:clamp(16px,4vw,40px);padding-block:0 80px}
+*{box-sizing:border-box}
+a{color:inherit}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.1}
+h2{font-size:clamp(22px,2.6vw,30px);line-height:1.2}
+h3{font-size:16px}
+p{margin:0}
+.wrap{max-width:1120px;margin-inline:auto}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+header.top{padding-block:56px 32px;border-bottom:1px solid var(--line)}
+header.top .lede{max-width:62ch;margin-top:18px;font-size:17px}
+.anchors{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.anchors a{font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--fg);background:var(--surface)}
+.anchors a:hover{border-color:var(--fg)}
+
+section{padding-block:56px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:24px 48px;align-items:start;margin-bottom:28px}
+.sec-head p{max-width:64ch}
+@media (max-width:760px){.sec-head{grid-template-columns:1fr}}
+
+/* current site */
+.now{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;align-items:start}
+@media (max-width:760px){.now{grid-template-columns:1fr}}
+.shot{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+ul.points{margin:0;padding-left:1.1em;display:grid;gap:10px}
+ul.points li::marker{color:var(--muted)}
+
+/* reference cards */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.tabs button{font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card .img{aspect-ratio:4/3;overflow:hidden;background:var(--soft);border-bottom:1px solid var(--line)}
+.card .img img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.card .body{padding:14px 16px 16px;display:grid;gap:8px}
+.card .title{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.card .title a{font-size:12px;color:var(--muted);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .title a:hover{color:var(--fg)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:1px 6px}
+.tag.pick{color:var(--ok);border-color:currentColor}
+.kv{display:grid;grid-template-columns:3em minmax(0,1fr);gap:4px 10px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.card[hidden]{display:none}
+.note{font-size:12.5px;color:var(--muted);margin-top:16px}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.rule{background:var(--surface);padding:20px 22px;display:grid;gap:8px;align-content:start}
+.rule h3{font-size:15px}
+.rule p{font-size:14px;color:var(--muted)}
+
+/* directions */
+.dirs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.dir{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:grid;grid-template-rows:auto 1fr;min-width:0}
+.dir.rec{border-color:var(--ok)}
+.wire{aspect-ratio:4/3;padding:10px;display:grid;gap:6px;align-content:start;position:relative}
+.wire.light{background:#fafaf9}
+.wire.dark{background:#0f1011}
+.wire .bar{height:6px;width:34%;border-radius:2px;background:#cfcfcb;margin-bottom:4px}
+.wire.dark .bar{background:#3a3d40}
+.wire .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.wire .g2{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+.wire .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.wire img{width:100%;display:block;object-fit:cover;border-radius:1px}
+.wire .g3 img{aspect-ratio:3/2}
+.wire .g2 img{aspect-ratio:3/4}
+.wire .g4 img{aspect-ratio:1}
+.wire .cap{height:4px;width:60%;background:#dedfdb;border-radius:2px;margin:3px auto 0}
+.dir .body{padding:16px 18px 18px;display:grid;gap:10px;align-content:start}
+.dir .body h3{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dir .body p{font-size:13.5px}
+.dir .body b{font-weight:600}
+
+/* demo */
+.demo-bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:14px}
+.demo-bar .grp{display:flex;gap:4px;align-items:center}
+.demo-bar .grp span{font-size:12px;color:var(--muted);margin-right:4px}
+.demo-bar button{font:inherit;font-size:13px;padding:5px 11px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.demo-bar button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.demo-bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.frame-wrap{display:flex;justify-content:center;background:var(--soft);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(8px,2vw,24px);overflow:hidden}
+.frame{width:100%;max-width:100%;height:min(760px,82vh);background:var(--d-bg);color:var(--d-fg);border:1px solid var(--line);border-radius:8px;overflow:auto;position:relative;container-type:inline-size;transition:max-width .25s ease;font-family:var(--font-demo);font-size:14px;line-height:1.5;scroll-behavior:smooth;outline:none}
+.frame[data-vp="mobile"]{max-width:390px}
+.frame:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+.frame[data-tone="light"]{--d-bg:#fafaf9;--d-fg:#1b1b1a;--d-muted:#80807c;--d-line:#e6e6e2}
+.frame[data-tone="dark"]{--d-bg:#0e0f10;--d-fg:#ebebe8;--d-muted:#8b8e92;--d-line:#232528}
+.frame *{box-sizing:border-box}
+.frame a{text-decoration:none;color:inherit}
+.frame .hd{display:flex;justify-content:space-between;align-items:baseline;padding:clamp(16px,3cqw,28px) clamp(16px,4cqw,48px) 0;position:sticky;top:0;background:color-mix(in srgb,var(--d-bg) 88%,transparent);backdrop-filter:blur(8px);z-index:2;padding-bottom:14px}
+.frame .wm{font-weight:500;letter-spacing:-.01em;font-size:15px}
+.frame .nav{display:flex;gap:clamp(12px,2.4cqw,22px);font-size:13px;color:var(--d-muted)}
+.frame .nav a[aria-current]{color:var(--d-fg)}
+.frame .nav a:hover{color:var(--d-fg)}
+.frame .pg{padding:clamp(8px,2cqw,20px) clamp(16px,4cqw,48px) 64px}
+.frame .intro{font-size:13px;color:var(--d-muted);max-width:52ch;margin-bottom:clamp(20px,4cqw,40px)}
+.frame .covers{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,3cqw,36px) clamp(12px,2.4cqw,28px)}
+@container (max-width:700px){.frame .covers{grid-template-columns:repeat(2,1fr)}}
+@container (max-width:460px){.frame .covers{grid-template-columns:1fr}}
+.frame .cover{display:grid;gap:8px;cursor:pointer}
+.frame .cover .ph{aspect-ratio:3/2;overflow:hidden;background:var(--d-line)}
+.frame .cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.frame .cover:hover img{transform:scale(1.02)}
+.frame .cover .t{font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.frame .cover .t span{color:var(--d-muted)}
+.frame .sh{display:grid;gap:4px;margin-bottom:clamp(20px,4cqw,40px)}
+.frame .sh .back{font-size:12px;color:var(--d-muted)}
+.frame .sh h1{font-size:clamp(20px,3cqw,26px);font-weight:500;letter-spacing:-.015em;line-height:1.2}
+.frame .sh .meta{font-size:12.5px;color:var(--d-muted)}
+.frame .flow{display:grid;gap:clamp(28px,6cqw,64px);justify-items:center}
+.frame .fig{display:grid;gap:8px;justify-items:center;width:100%;max-width:1400px}
+.frame .fig img{display:block;max-width:100%;max-height:min(88cqh,620px);height:auto;width:auto;cursor:zoom-in}
+.frame .fig figcaption{font-size:12px;color:var(--d-muted);font-variant-numeric:tabular-nums}
+.frame .pair{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,2cqw,20px);width:100%;max-width:1400px}
+.frame .pair .fig img{max-height:none;width:100%}
+@container (max-width:560px){.frame .pair{grid-template-columns:1fr}}
+.frame .recent{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(6px,1.2cqw,12px)}
+@container (max-width:560px){.frame .recent{grid-template-columns:repeat(2,1fr)}}
+.frame .recent img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:zoom-in}
+.frame .text{max-width:56ch;display:grid;gap:14px;font-size:14px}
+.frame .text p{color:var(--d-fg)}
+.frame .text .m{color:var(--d-muted);font-size:13px}
+.frame .lb{position:absolute;inset:0;background:#000;color:#ddd;z-index:5;display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center}
+.frame .lb img{max-width:calc(100% - 32px);max-height:calc(100% - 24px);object-fit:contain;display:block;margin-top:12px}
+.frame .lb .lbbar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 16px 14px;font-size:12px;color:#9a9a9a;font-variant-numeric:tabular-nums}
+.frame .lb .lbbar b{font-weight:500;color:#ddd}
+.frame .lb button{font:inherit;background:transparent;border:0;color:#bbb;cursor:pointer;font-size:12px;padding:4px 8px}
+.frame .lb button:hover{color:#fff}
+.frame .lb .x{position:absolute;top:10px;right:10px;font-size:18px;line-height:1}
+.frame .lb .arr{position:absolute;top:0;bottom:48px;width:28%;cursor:pointer}
+.frame .lb .arr.l{left:0;cursor:w-resize}.frame .lb .arr.r{right:0;cursor:e-resize}
+.frame[hidden]{display:none}
+.demo-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}
+.demo-side .box{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;background:var(--surface);font-size:13.5px;display:grid;gap:6px;align-content:start}
+.demo-side .box h3{font-size:13px}
+.demo-side .tones{display:flex;flex-wrap:wrap;gap:4px}
+.demo-side .tones span{font-size:12px;border:1px solid var(--line);border-radius:3px;padding:1px 6px}
+.demo-side .tones span.d{background:#101113;color:#e6e6e3;border-color:#101113}
+
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+td:first-child{white-space:nowrap}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;align-items:start}
+footer{padding-block:32px;font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">设计提案 · 2026-10-15 · 草案</div>
+  <h1 style="margin-top:10px">yiwang.photography 重建：参考案例与设计方案</h1>
+  <p class="lede">现站在 Squarespace 上，4 列小图网格把照片当缩略图展示，图片走美国源站，大陆打开要二三十秒。这一页先看别人怎么做（24 个站，三类），再把推荐的版式用你现站的真实照片搭出来，可以点、可以切手机宽度、可以进灯箱。</p>
+  <nav class="anchors" aria-label="页内导航">
+    <a href="#now">现状</a><a href="#refs">参考案例</a><a href="#rules">六条纪律</a><a href="#directions">三个方向</a><a href="#demo">推荐方案演示</a><a href="#decisions">待拍板与分期</a>
+  </nav>
+</header>
+
+<section id="now">
+  <div class="sec-head"><h2>现状</h2><p>现站的问题不在"慢"，在"小"。版式把每张照片压到 180 px 宽，加载再快也是在看缩略图。</p></div>
+  <div class="now">
+    <figure class="shot" style="margin:0"><img src="refs/current-tokyo-night.jpg" alt="现站 Tokyo Night 页面：顶部横幅，下面 4 列小图网格" width="400" height="300"><figcaption>yiwang.photography/tokyo-night，800 px 宽窗口里的样子</figcaption></figure>
+    <ul class="points">
+      <li><b>照片被当缩略图。</b>画廊页是 4 列等宽网格，每张图在 800 px 窗口里只有 180 px，桌面大屏也只有 300 px 左右。</li>
+      <li><b>16 个系列，约 250 张。</b>按城市 / 主题命名（Shanghai I、Tokyo Night、San Francisco Sunset…），"一个系列 = 一次旅行或一个主题"的组织方式是对的，保留。</li>
+      <li><b>Squarespace 已经把图缩到 2000 px 宽</b>再发给访客，10 MB 原图从没真正传出去过。新站用 3200 px 上限反而更大。</li>
+      <li><b>第三方依赖：</b>字体从 Squarespace CDN 拉，cookie 横幅，图片走 Fastly 美国节点。这些在大陆都是减分项。</li>
+      <li><b>/presets 和 /cart</b> 是 Squarespace 的商城，静态站放不下，要单独决定。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="refs">
+  <div class="sec-head"><h2>参考案例</h2><p>只记对我们有用的观察。截图是 800 × 600 的窗口，部分是半分辨率抓的，看版式不看细节。标了"参照"的是推荐方案直接借鉴的。</p></div>
+  <div class="tabs" role="group" aria-label="筛选类别">
+    <button type="button" data-cat="all" aria-pressed="true">全部</button>
+    <button type="button" data-cat="master" aria-pressed="false">成熟摄影师</button>
+    <button type="button" data-cat="land" aria-pressed="false">风光 · Instagram</button>
+    <button type="button" data-cat="ai" aria-pressed="false">AI 时代前端</button>
+  </div>
+  <div class="cards" id="cards">
+    <article class="card" data-cat="master"><div class="img"><img src="refs/yasui-home.jpg" alt="Takashi Yasui 首页：一张全幅横图，下面 3 列系列封面" loading="lazy" width="800" height="600"></div><div class="body"><div class="title"><h3>Takashi Yasui</h3><a href="https://www.takashiyasui.com/" target="_blank" rel="noopener">takashiyasui.com</a></div><div><span class="tag pick">参照</span> <span class="tag">东京 · Instagram 起家</span></div><dl class="kv"><dt>观察</dt><dd>纯白。首页一张全幅图，往下 3 列系列封面，标题只有一行小字："Tokyo Observations (2015–2024)"。页脚只有版权。</dd><dt>启示</dt><dd>题材、体量、出身都和我们最接近。克制到极致也成立。系列封面 + 一行标题 + 年份，是首页的模板。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/yasui-grid.jpg" alt="Takashi Yasui 系列封面墙：3 列，每列下一行标题" loading="lazy" width="800" height="600"></div><div class="body"><div class="title"><h3>Yasui · 系列封面墙</h3><a href="https://www.takashiyasui.com/" target="_blank" rel="noopener">takashiyasui.com</a></div><div><span class="tag pick">参照</span></div><dl class="kv"><dt>观察</dt><dd>封面 3:2，列间距大，标题居中、字号小、无衬线；没有悬停效果，没有张数。</dd><dt>启示</dt><dd>我们在这个基础上加"N 张"和年份，其余照搬。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/kawauchi-works.jpg" alt="Rinko Kawauchi Works 页：左侧固定导航，右侧系列列表和纵向大图" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Rinko Kawauchi 川内倫子</h3><a href="https://rinkokawauchi.com/works/" target="_blank" rel="noopener">rinkokawauchi.com</a></div><div><span class="tag pick">参照</span> <span class="tag">档案型</span></div><dl class="kv"><dt>观察</dt><dd>左栏细衬线导航（EN / JP），Works 是系列名 + 年份的列表，进系列后单列大图纵向排，一张一张看。</dd><dt>启示</dt><dd>单列纵向 + 年份列表 = 档案感。我们的系列页用这个节奏。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/kander-series.jpg" alt="Nadav Kander Works in Series：3 列封面，下方标题和 Series of 37" loading="lazy" width="800" height="600"></div><div class="body"><div class="title"><h3>Nadav Kander</h3><a href="https://www.nadavkander.com/works-in-series" target="_blank" rel="noopener">nadavkander.com</a></div><div><span class="tag pick">参照</span> <span class="tag">档案型</span></div><dl class="kv"><dt>观察</dt><dd>白底小号无衬线；导航 4 组 12 项；封面下"Dark Line – The Thames Estuary · Series of 37"。截图时图片还没加载完，只剩版式。</dd><dt>启示</dt><dd>"Series of N"便宜又有味道。导航 12 项太多，我们 4 项以内。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/liamwong-art.jpg" alt="Liam Wong 作品页：近黑底，两列大图瀑布流" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Liam Wong</h3><a href="https://www.liamwong.com/art" target="_blank" rel="noopener">liamwong.com</a></div><div><span class="tag pick">参照</span> <span class="tag">东京夜景</span></div><dl class="kv"><dt>观察</dt><dd>近黑底，两列大图几乎无缝；顶部一条书籍 / 签名版的推广条；小号大写导航。</dd><dt>启示</dt><dd>夜景只有在深色底上才对，白底会把霓虹洗掉。适合 tokyo-night、shinjuku、lights，不适合白天的系列。所以我们按系列切色调，而不是整站黑。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/magnum-webb.jpg" alt="Magnum 的 Alex Webb 页面：居中衬线名字，三个 tab，横向图片带" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Magnum · Alex Webb</h3><a href="https://www.magnumphotos.com/photographer/alex-webb/" target="_blank" rel="noopener">magnumphotos.com</a></div><div><span class="tag">编辑部</span></div><dl class="kv"><dt>观察</dt><dd>居中衬线名字，Profile / Highlight / Most Recent 三个 tab，横向图片带，衬线正文传记。</dd><dt>启示</dt><dd>"Most Recent"这个维度值得要：除系列外加一个按时间倒序的 Recent 页给常客。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/kenna.jpg" alt="Michael Kenna 首页：居中单图，衬线红色大写名字" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Michael Kenna</h3><a href="https://www.michaelkenna.com/" target="_blank" rel="noopener">michaelkenna.com</a></div><div><span class="tag">古典</span></div><dl class="kv"><dt>观察</dt><dd>居中单图，衬线红色大写名字，像画廊墙。</dd><dt>启示</dt><dd>整体太古典，不取；但"图四周留白、不贴边"是对的。</dd></dl></div></article>
+    <article class="card" data-cat="master"><div class="img"><img src="refs/alecsoth.jpg" alt="Alec Soth 首页：芥末黄色块自我介绍，粗体导航，博客式信息流" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Alec Soth</h3><a href="https://alecsoth.com/photography/" target="_blank" rel="noopener">alecsoth.com</a></div><div><span class="tag">个性</span></div><dl class="kv"><dt>观察</dt><dd>芥末黄色块里一段手写口吻的自我介绍，粗体大导航，下面是博客式信息流。</dd><dt>启示</dt><dd>不走这个方向，但"首页有一句人话"值得借。</dd></dl></div></article>
+
+    <article class="card" data-cat="land"><div class="img"><img src="refs/mckinnon.jpg" alt="Peter McKinnon 首页：贴边 4 列方形马赛克" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Peter McKinnon</h3><a href="https://www.petermckinnon.com/" target="_blank" rel="noopener">petermckinnon.com</a></div><div><span class="tag">Instagram 网格</span></div><dl class="kv"><dt>观察</dt><dd>白底，居中打字机体 wordmark，极小大写导航；首页是贴边 4 列近方形马赛克，混排所有题材。</dd><dt>启示</dt><dd>Instagram 网格搬上网页。扫得快，但每张图都小、都被裁方，正是现站的毛病。</dd></dl></div></article>
+    <article class="card" data-cat="land"><div class="img"><img src="refs/hardman.jpg" alt="Benjamin Hardman 首页：粗压缩体 wordmark，全幅 hero" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Benjamin Hardman</h3><a href="https://benjaminhardman.com/" target="_blank" rel="noopener">benjaminhardman.com</a></div><div><span class="tag">风光 · 商业</span></div><dl class="kv"><dt>观察</dt><dd>白底，粗压缩体 wordmark，大写导航 Courses / Prints / Expeditions / About / Contact，全幅轮播 hero。</dd><dt>启示</dt><dd>干净的商业模板，导航里 3 项是卖东西的。全幅 hero 可取，导航不取。</dd></dl></div></article>
+    <article class="card" data-cat="land"><div class="img"><img src="refs/burkard-home.jpg" alt="Chris Burkard 首页：黑底，左侧巨大竖排导航，右侧粉色相框视频" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Chris Burkard</h3><a href="https://www.chrisburkard.com/" target="_blank" rel="noopener">chrisburkard.com</a></div><div><span class="tag">品牌</span></div><dl class="kv"><dt>观察</dt><dd>黑底，左侧巨大压缩体竖排导航 PORTFOLIO / SHOP / ABOUT / FILM，右侧粉色相框里一段视频；Portfolio 内页白底全宽大图。</dd><dt>启示</dt><dd>品牌先于照片，是经营到一定规模后的形态。内页的全宽大图可取。</dd></dl></div></article>
+    <article class="card" data-cat="land"><div class="img"><img src="refs/maxrive-top.jpg" alt="Max Rive 首页：Framed Prints 轮播，Wall Art / Home Decor 导航" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Max Rive</h3><a href="https://maxrive.com/" target="_blank" rel="noopener">maxrive.com</a></div><div><span class="tag">打印商店</span></div><dl class="kv"><dt>观察</dt><dd>首页是"Framed Prints · Start Shopping"轮播 + Wall Art / Home Decor / Lifestyle 分类，往下才是作品瀑布流。</dd><dt>启示</dt><dd>本质是打印商店模板。不是设计参考，是商业模式参考：风光摄影师普遍 shop 优先。</dd></dl></div></article>
+    <article class="card" data-cat="land"><div class="img"><img src="refs/anseladams.jpg" alt="Ansel Adams Gallery 首页：深色导航，全幅黑白山景" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Ansel Adams Gallery</h3><a href="https://www.anseladams.com/" target="_blank" rel="noopener">anseladams.com</a></div><div><span class="tag">画廊商店</span></div><dl class="kv"><dt>观察</dt><dd>深色导航 + 全幅黑白 hero，Explore Photographs / Shop / Visit Us，进站弹优惠。</dd><dt>启示</dt><dd>黑白大图上深色 chrome 很顺，是深色系列页的参考。</dd></dl></div></article>
+    <article class="card" data-cat="land"><div class="img"><img src="refs/kordan.jpg" alt="Daniel Kordan 首页：全幅 hero，导航被各年 workshops 占满" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Daniel Kordan</h3><a href="https://danielkordan.com/" target="_blank" rel="noopener">danielkordan.com</a></div><div><span class="tag">Workshop</span></div><dl class="kv"><dt>观察</dt><dd>全幅 hero，导航被 2025 / 2026 / 2027 workshops 占满。</dd><dt>启示</dt><dd>报名站，不取。</dd></dl></div></article>
+
+    <article class="card" data-cat="ai"><div class="img"><img src="refs/linear.jpg" alt="Linear 首页：黑底，大号紧字距标题，产品截图卡片" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Linear</h3><a href="https://linear.app/" target="_blank" rel="noopener">linear.app</a></div><div><span class="tag">排版纪律</span></div><dl class="kv"><dt>观察</dt><dd>纯黑底；大号紧字距无衬线标题，次级文案中灰；产品截图放在一张卡片里；导航 5 项 + 两个按钮。</dd><dt>启示</dt><dd>一套字、两三个灰、大留白。深色系列页的字距和灰阶参照它。</dd></dl></div></article>
+    <article class="card" data-cat="ai"><div class="img"><img src="refs/vercel.jpg" alt="Vercel 首页：黑白两色，居中一个物件，下面一排 logo" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Vercel</h3><a href="https://vercel.com/" target="_blank" rel="noopener">vercel.com</a></div><div><span class="tag">排版纪律</span></div><dl class="kv"><dt>观察</dt><dd>黑白两色，Geist 一套字走天下；居中一个物件；没有一处渐变。</dd><dt>启示</dt><dd>"没有渐变、没有装饰"这条我们照抄。</dd></dl></div></article>
+    <article class="card" data-cat="ai"><div class="img"><img src="refs/anthropic.jpg" alt="Anthropic 首页：暖米白底，衬线正文，圆角卡片" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Anthropic</h3><a href="https://www.anthropic.com/" target="_blank" rel="noopener">anthropic.com</a></div><div><span class="tag">暖浅色</span></div><dl class="kv"><dt>观察</dt><dd>暖米白底，正文衬线，圆角柔和的卡片，段落留白很大。"人文"而不是"科技"。</dd><dt>启示</dt><dd>浅色系列页的底色往暖一点走，别用纯 #fff。衬线正文留给 about 长文。</dd></dl></div></article>
+    <article class="card" data-cat="ai"><div class="img"><img src="refs/luma.jpg" alt="Luma 首页：中灰渐变底，居中一句标题和药丸按钮" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Luma</h3><a href="https://lumalabs.ai/" target="_blank" rel="noopener">lumalabs.ai</a></div><div><span class="tag">中灰</span></div><dl class="kv"><dt>观察</dt><dd>中灰渐变底，居中一句标题 + 药丸按钮。比 Linear 柔，比 Anthropic 冷。</dd><dt>启示</dt><dd>中灰底对照片最不友好（既不衬亮部也不衬暗部），我们不用。</dd></dl></div></article>
+    <article class="card" data-cat="ai"><div class="img"><img src="refs/rauno.jpg" alt="rauno.me：浅灰底上一张白卡" loading="lazy" width="400" height="300"></div><div class="body"><div class="title"><h3>Rauno Freiberg</h3><a href="https://rauno.me/" target="_blank" rel="noopener">rauno.me</a></div><div><span class="tag">前端 craft</span></div><dl class="kv"><dt>观察</dt><dd>浅灰底上一张白卡，内容在卡里；光标、过渡这些交互细节是重点。</dd><dt>启示</dt><dd>动效只在交互处：灯箱开合、图片淡入、hover 出 caption。不做滚动视差和入场动画。</dd></dl></div></article>
+  </div>
+  <p class="note">没截到的：Greg Girard（白底单图幻灯 + 左下一行"Platform Conductor Tokyo 1976"式 caption，启示是"地点 年份"的 caption 风格）、Saul Leiter Foundation 和 Fan Ho（机构站 / 博客站，不取）、Todd Hido、Stephen Shore、RK（浏览器打不开）。Sebastião Salgado 的原域名已经不是他的站。</p>
+</section>
+
+<section id="rules">
+  <div class="sec-head"><h2>六条纪律</h2><p>从 Linear、Vercel、Anthropic 这类站抽出来的不是视觉，是规矩。它们直接变成新站的设计约束。</p></div>
+  <div class="rules">
+    <div class="rule"><h3>一套字体</h3><p>一款无衬线包揽，或无衬线 UI + 衬线正文。不出现第三种。字体自托管，不拉 Google Fonts，大陆打不开。</p></div>
+    <div class="rule"><h3>三个色</h3><p>底色、正文色、弱化色。强调色只给链接 hover。照片是唯一的颜色来源。</p></div>
+    <div class="rule"><h3>chrome 退到最小</h3><p>导航不超过 4 项，页脚一行，没有 hero 文案、横幅、cookie 条、社交图标墙。</p></div>
+    <div class="rule"><h3>留白按比例</h3><p>图与图、图与边的间距随视口缩放，手机上也不贴边。</p></div>
+    <div class="rule"><h3>动效只在交互处</h3><p>灯箱开合、图片淡入、hover 出 caption。不做滚动视差，不做入场动画。</p></div>
+    <div class="rule"><h3>性能是设计的一部分</h3><p>首图不 lazy，其余 lazy；四档 srcset；大陆慢链路上先出文字和版式，再出图。</p></div>
+  </div>
+</section>
+
+<section id="directions">
+  <div class="sec-head"><h2>三个方向</h2><p>示意图用的都是你现站的照片。推荐 A 为底，把 B 降级成"系列级别的色调"。</p></div>
+  <div class="dirs">
+    <article class="dir rec">
+      <div class="wire light"><div class="bar"></div><div class="g3"><img src="photos/aviation-00.webp" alt="" loading="lazy"><img src="photos/sanfrancisco-sunset-00.webp" alt="" loading="lazy"><img src="photos/pacifica-00.webp" alt="" loading="lazy"></div><div class="cap"></div><div class="g3"><img src="photos/newcastle-00.webp" alt="" loading="lazy"><img src="photos/amusement-park-00.webp" alt="" loading="lazy"><img src="photos/sunset-00.webp" alt="" loading="lazy"></div><div class="cap"></div></div>
+      <div class="body"><h3>A · 档案型 <span class="tag pick">推荐</span></h3><p class="muted">Yasui / Kawauchi / Kander</p><p>米白底，小号排版，首页是系列列表（封面 + 标题 + 年份 + 张数），系列页单列大图纵向排，每张下面一行弱化 caption。</p><p><b>适合</b>：系列会一直增加、题材以城市为主、十年后看不过时。</p><p><b>风险</b>：白底对夜景不友好；比 Instagram 上的观感"安静"。</p></div>
+    </article>
+    <article class="dir">
+      <div class="wire dark"><div class="bar"></div><div class="g2"><img src="photos/tokyo-night-00.webp" alt="" loading="lazy"><img src="photos/los-angeles-i-00.webp" alt="" loading="lazy"></div><div class="g2"><img src="photos/shinjuku-00.webp" alt="" loading="lazy"><img src="photos/shanghai-i-00.webp" alt="" loading="lazy"></div></div>
+      <div class="body"><h3>B · 夜景型</h3><p class="muted">Liam Wong</p><p>近黑底，两列大图瀑布流，几乎无缝，颜色自己说话。</p><p><b>适合</b>：tokyo-night、shinjuku、lights、shanghai-ii。</p><p><b>风险</b>：白天的系列（sanfrancisco-sunset、pacifica、aviation）在黑底上发灰；整站黑底手机户外阅读差。</p></div>
+    </article>
+    <article class="dir">
+      <div class="wire light"><div class="bar" style="margin-inline:auto"></div><div class="g4"><img src="photos/tokyo-night-01.webp" alt="" loading="lazy"><img src="photos/aviation-01.webp" alt="" loading="lazy"><img src="photos/shanghai-i-01.webp" alt="" loading="lazy"><img src="photos/sanfrancisco-01.webp" alt="" loading="lazy"><img src="photos/pacifica-01.webp" alt="" loading="lazy"><img src="photos/shinjuku-01.webp" alt="" loading="lazy"><img src="photos/sanfrancisco-sunset-01.webp" alt="" loading="lazy"><img src="photos/tokyo-night-02.webp" alt="" loading="lazy"><img src="photos/aviation-02.webp" alt="" loading="lazy"><img src="photos/shanghai-i-02.webp" alt="" loading="lazy"><img src="photos/sanfrancisco-02.webp" alt="" loading="lazy"><img src="photos/pacifica-02.webp" alt="" loading="lazy"></div></div>
+      <div class="body"><h3>C · 网格型</h3><p class="muted">McKinnon / Instagram</p><p>贴边马赛克，所有系列混排，靠 wordmark 和人设撑。</p><p><b>适合</b>：题材杂、更新频繁、把网站当 Instagram 镜像。</p><p><b>风险</b>：每张图都小，正是现站的毛病；要大量裁方。</p></div>
+    </article>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="sec-head"><h2>推荐方案演示</h2><p>用现站照片搭的可点原型：首页是系列封面墙；进 Aviation 看浅色系列页，进 Tokyo Night 看整页切深色；点任何一张图进灯箱，键盘左右翻、Esc 退出。切到"手机"看 390 px 宽的排法。</p></div>
+  <div class="demo-bar">
+    <div class="grp"><span>视口</span><button type="button" data-vp="desktop" aria-pressed="true">桌面</button><button type="button" data-vp="mobile" aria-pressed="false">手机 390</button></div>
+    <div class="grp"><span>跳到</span><button type="button" data-go="home">首页</button><button type="button" data-go="aviation">Aviation · 浅色</button><button type="button" data-go="tokyo-night">Tokyo Night · 深色</button><button type="button" data-go="recent">Recent</button><button type="button" data-go="lightbox">灯箱</button></div>
+  </div>
+  <div class="frame-wrap"><div class="frame" id="frame" data-vp="desktop" data-tone="light" tabindex="0" aria-label="原型站点，可用键盘操作"></div></div>
+  <div class="demo-side">
+    <div class="box"><h3>原型里是真的</h3><p>所有照片来自现站各系列（1500 px 版本），张数是现站的实际张数。系列页只放了下载下来的几张，不是全集。</p></div>
+    <div class="box"><h3>原型里是假的</h3><p>年份和 EXIF 还没有，正式版从 AfterFrame 的 <code>get_asset</code> 拿。Presets 和 About 是占位页。</p></div>
+    <div class="box"><h3>色调分配（示例）</h3><div class="tones"><span class="d">tokyo-night</span><span class="d">shinjuku</span><span class="d">lights</span><span class="d">shanghai-i</span><span class="d">shanghai-ii</span><span class="d">sanfrancisco</span><span class="d">los-angeles-i</span><span class="d">on-roppongi-hills</span><span>aviation</span><span>pacifica</span><span>sanfrancisco-sunset</span><span>sunset</span><span>newcastle</span><span>amusement-park</span><span>still-life-of-street</span><span>sanfrancisco-to</span></div><p class="muted">正式版写在 content/galleries.yaml 的 tone 字段里，一个系列一行。</p></div>
+    <div class="box"><h3>版式规则</h3><p>系列页单列，图最大高 88% 视口；连续两张竖图并排。不做瀑布流，因为系列是按拍摄时间讲故事的。导航 4 项：Work / Recent / Presets / About。</p></div>
+  </div>
+</section>
+
+<section id="decisions">
+  <div class="sec-head"><h2>待拍板与分期</h2><p>定了前两项就能从 P0 开始。详细方案见仓库里的 docs/plan.md。</p></div>
+  <div class="two">
+    <div class="tbl"><table><thead><tr><th>问题</th><th>建议</th></tr></thead><tbody>
+      <tr><td>/presets 商店</td><td>托管商店（Gumroad / Lemon Squeezy）+ 站内展示页外链；或下线</td></tr>
+      <tr><td>设计方向</td><td>档案型为底 + 系列级 tone 深浅切换（就是上面的演示）</td></tr>
+      <tr><td>最大档位</td><td>3200 px；原图不公开</td></tr>
+      <tr><td>页面显示 EXIF</td><td>相机 / 镜头 / 曝光，日期到月，无 GPS</td></tr>
+      <tr><td>图床</td><td>先 Cloudflare R2（免费），大陆测速不行切腾讯云 COS 香港</td></tr>
+      <tr><td>域名</td><td>DNS 迁 Cloudflare（R2 自定义域的前提），注册商可不动</td></tr>
+    </tbody></table></div>
+    <div class="tbl"><table><thead><tr><th>阶段</th><th>内容</th><th>估时</th></tr></thead><tbody>
+      <tr><td>P0</td><td>把这个原型定稿：色值、字号、间距、手机版</td><td>1 天</td></tr>
+      <tr><td>P1</td><td>Astro 实现；手写 manifest 用 20 张图验证；Pages 部署；DNS；R2 自定义域；17ce 测速</td><td>1–1.5 天</td></tr>
+      <tr><td>P2</td><td>publisher：读 AfterFrame MCP、sharp 渲染、S3 上传、manifest、deploy hook</td><td>2 天</td></tr>
+      <tr><td>P3</td><td>16 个系列建合集、并行跑、切 DNS、退订 Squarespace</td><td>0.5 天</td></tr>
+      <tr><td>P4</td><td>双图床、AVIF、about 长文、Recent 细节</td><td>按需</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<footer>仓库：~/Desktop/workspace/yiwang-photography · 本页源文件 docs/prototypes/design-review.html · 截图 docs/prototypes/refs · 照片 docs/prototypes/photos</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- reference filter ----------
+  var tabs=document.querySelectorAll('.tabs button');
+  var cards=document.querySelectorAll('#cards .card');
+  tabs.forEach(function(b){b.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    var cat=b.dataset.cat;
+    cards.forEach(function(c){c.hidden=!(cat==='all'||c.dataset.cat===cat)});
+  })});
+
+  // ---------- demo site ----------
+  var PHOTOS=[{"f":"tokyo-night-00.webp","g":"tokyo-night","w":1425,"h":2000},{"f":"tokyo-night-01.webp","g":"tokyo-night","w":2000,"h":1296},{"f":"tokyo-night-02.webp","g":"tokyo-night","w":2000,"h":1333},{"f":"tokyo-night-03.webp","g":"tokyo-night","w":2000,"h":1036},{"f":"tokyo-night-04.webp","g":"tokyo-night","w":2000,"h":1229},{"f":"tokyo-night-05.webp","g":"tokyo-night","w":2000,"h":1112},{"f":"tokyo-night-06.webp","g":"tokyo-night","w":2000,"h":1036},{"f":"tokyo-night-07.webp","g":"tokyo-night","w":2000,"h":1333},{"f":"sanfrancisco-00.webp","g":"sanfrancisco","w":2000,"h":1316},{"f":"sanfrancisco-01.webp","g":"sanfrancisco","w":2000,"h":1333},{"f":"sanfrancisco-02.webp","g":"sanfrancisco","w":2000,"h":1333},{"f":"sanfrancisco-03.webp","g":"sanfrancisco","w":2000,"h":1333},{"f":"sanfrancisco-04.webp","g":"sanfrancisco","w":2000,"h":1333},{"f":"sanfrancisco-05.webp","g":"sanfrancisco","w":2000,"h":1388},{"f":"sanfrancisco-06.webp","g":"sanfrancisco","w":2000,"h":1316},{"f":"sanfrancisco-07.webp","g":"sanfrancisco","w":2000,"h":1316},{"f":"shanghai-i-00.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shanghai-i-01.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shanghai-i-02.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shanghai-i-03.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shinjuku-00.webp","g":"shinjuku","w":4761,"h":3559},{"f":"shinjuku-01.webp","g":"shinjuku","w":4784,"h":3648},{"f":"shinjuku-02.webp","g":"shinjuku","w":5162,"h":3648},{"f":"shinjuku-03.webp","g":"shinjuku","w":5469,"h":3646},{"f":"amusement-park-00.webp","g":"amusement-park","w":2000,"h":1450},{"f":"aviation-00.webp","g":"aviation","w":6720,"h":4480},{"f":"lights-00.webp","g":"lights","w":2000,"h":734},{"f":"los-angeles-i-00.webp","g":"los-angeles-i","w":1333,"h":2000},{"f":"newcastle-00.webp","g":"newcastle","w":2000,"h":1199},{"f":"on-roppongi-hills-00.webp","g":"on-roppongi-hills","w":2000,"h":1115},{"f":"pacifica-00.webp","g":"pacifica","w":11556,"h":7444},{"f":"sanfrancisco-sunset-00.webp","g":"sanfrancisco-sunset","w":5727,"h":4104},{"f":"sanfrancisco-to-00.webp","g":"sanfrancisco-to","w":6210,"h":4114},{"f":"shanghai-ii-00.webp","g":"shanghai-ii","w":2000,"h":1333},{"f":"still-life-of-street-00.webp","g":"still-life-of-street","w":4526,"h":4540},{"f":"sunset-00.webp","g":"sunset","w":2000,"h":1333},{"f":"sanfrancisco-sunset-01.webp","g":"sanfrancisco-sunset","w":4752,"h":3416},{"f":"sanfrancisco-sunset-02.webp","g":"sanfrancisco-sunset","w":4557,"h":3360},{"f":"sanfrancisco-sunset-03.webp","g":"sanfrancisco-sunset","w":5040,"h":3360},{"f":"sanfrancisco-sunset-04.webp","g":"sanfrancisco-sunset","w":5040,"h":3360},{"f":"sanfrancisco-sunset-05.webp","g":"sanfrancisco-sunset","w":3033,"h":4510},{"f":"sanfrancisco-sunset-06.webp","g":"sanfrancisco-sunset","w":5040,"h":3360},{"f":"sanfrancisco-sunset-07.webp","g":"sanfrancisco-sunset","w":4460,"h":2759},{"f":"aviation-01.webp","g":"aviation","w":4899,"h":3099},{"f":"aviation-02.webp","g":"aviation","w":5882,"h":3643},{"f":"aviation-03.webp","g":"aviation","w":6720,"h":4169},{"f":"aviation-04.webp","g":"aviation","w":6625,"h":4417},{"f":"aviation-05.webp","g":"aviation","w":4676,"h":3021},{"f":"shanghai-i-04.webp","g":"shanghai-i","w":2000,"h":1457},{"f":"shanghai-i-05.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shanghai-i-06.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"shanghai-i-07.webp","g":"shanghai-i","w":2000,"h":1333},{"f":"pacifica-01.webp","g":"pacifica","w":8539,"h":5568},{"f":"pacifica-02.webp","g":"pacifica","w":10828,"h":6773},{"f":"pacifica-03.webp","g":"pacifica","w":11464,"h":7085},{"f":"pacifica-04.webp","g":"pacifica","w":11556,"h":7444}];
+  var COUNTS={"amusement-park":19,"aviation":33,"lights":7,"los-angeles-i":11,"newcastle":10,"on-roppongi-hills":13,"pacifica":5,"sanfrancisco-sunset":13,"sanfrancisco-to":23,"sanfrancisco":17,"shanghai-i":12,"shanghai-ii":15,"shinjuku":27,"still-life-of-street":10,"sunset":8,"tokyo-night":12};
+  var DARK={"tokyo-night":1,"shinjuku":1,"lights":1,"shanghai-i":1,"shanghai-ii":1,"sanfrancisco":1,"los-angeles-i":1,"on-roppongi-hills":1};
+  var ORDER=["tokyo-night","shinjuku","aviation","sanfrancisco","sanfrancisco-sunset","shanghai-i","shanghai-ii","pacifica","los-angeles-i","on-roppongi-hills","lights","newcastle","sunset","amusement-park","still-life-of-street","sanfrancisco-to"];
+  function title(slug){return slug.split('-').map(function(w){return w==='i'||w==='ii'?w.toUpperCase():w==='sanfrancisco'?'San Francisco':w==='to'?'To':w.charAt(0).toUpperCase()+w.slice(1)}).join(' ')}
+  var byG={};PHOTOS.forEach(function(p){(byG[p.g]=byG[p.g]||[]).push(p)});
+  var frame=document.getElementById('frame');
+  var state={view:'home',slug:null,lb:-1};
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+
+  function header(current){
+    var items=[['home','Work'],['recent','Recent'],['presets','Presets'],['about','About']];
+    return '<div class="hd"><a class="wm" href="#" data-nav="home">Yi Wang</a><nav class="nav">'+items.map(function(it){return '<a href="#" data-nav="'+it[0]+'"'+(current===it[0]?' aria-current="page"':'')+'>'+it[1]+'</a>'}).join('')+'</nav></div>';
+  }
+  function imgTag(p,cls,extra){return '<img src="photos/'+p.f+'" width="'+p.w+'" height="'+p.h+'" alt="'+esc(title(p.g))+'" loading="lazy" decoding="async"'+(cls?' class="'+cls+'"':'')+(extra||'')+'>'}
+  function renderHome(){
+    frame.dataset.tone='light';
+    var covers=ORDER.filter(function(s){return byG[s]}).map(function(s){var p=byG[s][0];
+      return '<a class="cover" href="#" data-open="'+s+'"><div class="ph">'+imgTag(p)+'</div><div class="t"><span style="color:var(--d-fg)">'+esc(title(s))+'</span><span>'+COUNTS[s]+' photos</span></div></a>'}).join('');
+    frame.innerHTML=header('home')+'<div class="pg"><p class="intro">Photographs of cities and the roads between them. Shanghai, Tokyo, San Francisco.</p><div class="covers">'+covers+'</div></div>';
+  }
+  function renderSeries(slug){
+    var list=byG[slug]||[];
+    frame.dataset.tone=DARK[slug]?'dark':'light';
+    var html='',i=0;
+    while(i<list.length){
+      var p=list[i],portrait=p.h>p.w,q=list[i+1];
+      if(portrait&&q&&q.h>q.w){
+        html+='<div class="pair">'+fig(p,i,list.length)+fig(q,i+1,list.length)+'</div>';i+=2;
+      }else{html+=fig(p,i,list.length);i++}
+    }
+    frame.innerHTML=header('home')+'<div class="pg"><div class="sh"><a class="back" href="#" data-nav="home">← Work</a><h1>'+esc(title(slug))+'</h1><div class="meta">Series of '+COUNTS[slug]+' · showing '+list.length+' in this prototype</div></div><div class="flow">'+html+'</div></div>';
+    frame.scrollTop=0;
+  }
+  function fig(p,i,n){return '<figure class="fig" style="margin:0">'+imgTag(p,'',' data-lb="'+i+'"')+'<figcaption>'+String(i+1).padStart(2,'0')+' / '+String(n).padStart(2,'0')+'</figcaption></figure>'}
+  function renderRecent(){
+    frame.dataset.tone='light';
+    var list=PHOTOS.slice(0,30);
+    frame.innerHTML=header('recent')+'<div class="pg"><div class="sh"><h1>Recent</h1><div class="meta">Latest additions across all series</div></div><div class="recent">'+list.map(function(p,i){return imgTag(p,'',' data-lbr="'+i+'"')}).join('')+'</div></div>';
+    frame.scrollTop=0;
+  }
+  function renderText(which){
+    frame.dataset.tone='light';
+    var body=which==='about'
+      ?'<p>Yi Wang photographs cities at the hours when they stop pretending: late evenings in Tokyo and Shanghai, early light over San Francisco.</p><p class="m">Contact: hello@yiwang.photography · Instagram @yi.wang (placeholder copy for the prototype)</p>'
+      :'<p>Lightroom presets are sold through an external store. This page only shows what they look like and links out.</p><p class="m">Decision pending: hosted store or retire.</p>';
+    frame.innerHTML=header(which)+'<div class="pg"><div class="sh"><h1>'+(which==='about'?'About':'Presets')+'</h1></div><div class="text">'+body+'</div></div>';
+  }
+  var lbList=[],lbIdx=0;
+  function openLb(list,i){lbList=list;lbIdx=i;drawLb()}
+  function drawLb(){
+    var old=frame.querySelector('.lb');if(old)old.remove();
+    var p=lbList[lbIdx];if(!p)return;
+    var el=document.createElement('div');el.className='lb';
+    el.innerHTML='<div class="arr l" data-lbnav="-1" aria-label="上一张"></div><div class="arr r" data-lbnav="1" aria-label="下一张"></div>'+
+      '<img src="photos/'+p.f+'" width="'+p.w+'" height="'+p.h+'" alt="'+esc(title(p.g))+'" style="z-index:1">'+
+      '<div class="lbbar"><span><b>'+esc(title(p.g))+'</b> · '+(lbIdx+1)+' / '+lbList.length+'</span><span>'+p.w+' × '+p.h+' · EXIF 正式版显示</span><span><button type="button" data-lbnav="-1">←</button><button type="button" data-lbnav="1">→</button></span></div>'+
+      '<button type="button" class="x" data-lbclose aria-label="关闭">×</button>';
+    frame.appendChild(el);
+    var nx=lbList[lbIdx+1];if(nx){var pre=new Image();pre.src='photos/'+nx.f}
+  }
+  function closeLb(){var old=frame.querySelector('.lb');if(old)old.remove();lbList=[]}
+
+  frame.addEventListener('click',function(e){
+    var t=e.target.closest('[data-nav],[data-open],[data-lb],[data-lbr],[data-lbnav],[data-lbclose]');if(!t)return;
+    e.preventDefault();
+    if(t.dataset.lbclose!==undefined){closeLb();return}
+    if(t.dataset.lbnav){lbIdx=(lbIdx+Number(t.dataset.lbnav)+lbList.length)%lbList.length;drawLb();return}
+    if(t.dataset.nav){closeLb();state.view=t.dataset.nav;({home:renderHome,recent:renderRecent,about:function(){renderText('about')},presets:function(){renderText('presets')}})[state.view]();return}
+    if(t.dataset.open){closeLb();state.view='series';state.slug=t.dataset.open;renderSeries(state.slug);return}
+    if(t.dataset.lb){openLb(byG[state.slug],Number(t.dataset.lb));return}
+    if(t.dataset.lbr){openLb(PHOTOS.slice(0,30),Number(t.dataset.lbr));return}
+  });
+  frame.addEventListener('keydown',function(e){
+    if(!lbList.length)return;
+    if(e.key==='Escape'){closeLb();e.preventDefault()}
+    else if(e.key==='ArrowRight'){lbIdx=(lbIdx+1)%lbList.length;drawLb();e.preventDefault()}
+    else if(e.key==='ArrowLeft'){lbIdx=(lbIdx-1+lbList.length)%lbList.length;drawLb();e.preventDefault()}
+  });
+
+  document.querySelectorAll('.demo-bar [data-vp]').forEach(function(b){b.addEventListener('click',function(){
+    document.querySelectorAll('.demo-bar [data-vp]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    frame.dataset.vp=b.dataset.vp;
+  })});
+  document.querySelectorAll('.demo-bar [data-go]').forEach(function(b){b.addEventListener('click',function(){
+    closeLb();var g=b.dataset.go;
+    if(g==='home'){state.view='home';renderHome()}
+    else if(g==='recent'){state.view='recent';renderRecent()}
+    else if(g==='lightbox'){state.view='series';state.slug='tokyo-night';renderSeries('tokyo-night');openLb(byG['tokyo-night'],1)}
+    else{state.view='series';state.slug=g;renderSeries(g)}
+    frame.focus({preventScroll:true});
+  })});
+
+  renderHome();
+})();
+</script>

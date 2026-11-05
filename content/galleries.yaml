@@ -1,0 +1,96 @@
+# Which AfterFrame collections become galleries, and how the site presents them.
+# Order here is the order on the home page. Titles came from the old slugs; edit freely.
+# tone: dark makes the whole page dark for that series (a visitor's explicit theme choice still wins).
+# place groups series in the left index; the first series of a place sets the group's position.
+site:
+  title: yi.wang photography
+  # External links, in display order. icon is one of: instagram, xiaohongshu, map, afterframe, link
+  links:
+    - label: Instagram
+      url: https://www.instagram.com/yi.wang.123/
+      icon: instagram
+    - label: 小红书
+      url: https://www.xiaohongshu.com/user/profile/566bcae6b8ce1a2def8e47fa
+      icon: xiaohongshu
+
+galleries:
+  - slug: tokyo-night
+    place: Tokyo
+    collection: Tokyo Night
+    title: Tokyo Night
+    tone: dark
+  - slug: shinjuku
+    place: Tokyo
+    collection: Shinjuku
+    title: Shinjuku
+    tone: dark
+  - slug: aviation
+    place: San Francisco
+    collection: Aviation
+    title: Aviation
+    tone: light
+  - slug: sanfrancisco
+    place: San Francisco
+    collection: San Francisco
+    title: San Francisco
+    tone: dark
+  - slug: sanfrancisco-sunset
+    place: San Francisco
+    collection: San Francisco Sunset
+    title: San Francisco Sunset
+    tone: light
+  - slug: shanghai-i
+    place: Shanghai
+    collection: Shanghai I
+    title: Shanghai I
+    tone: dark
+  - slug: shanghai-ii
+    place: Shanghai
+    collection: Shanghai II
+    title: Shanghai II
+    tone: dark
+  - slug: pacifica
+    place: San Francisco
+    collection: Pacifica
+    title: Pacifica
+    tone: light
+  - slug: los-angeles-i
+    place: Los Angeles
+    collection: Los Angeles I
+    title: Los Angeles I
+    tone: dark
+  - slug: on-roppongi-hills
+    place: Tokyo
+    collection: On Roppongi Hills
+    title: On Roppongi Hills
+    tone: dark
+  - slug: lights
+    place: Tokyo
+    collection: Lights
+    title: Lights
+    tone: dark
+  - slug: newcastle
+    place: Newcastle
+    collection: Newcastle
+    title: Newcastle
+    tone: light
+  - slug: sunset
+    place: San Francisco
+    collection: Sunset
+    title: Sunset
+    tone: light
+  - slug: amusement-park
+    place: San Francisco
+    collection: Amusement Park
+    title: Amusement Park
+    tone: light
+  - slug: still-life-of-street
+    place: Tokyo
+    collection: Still Life of Street
+    title: Still Life of Street
+    tone: light
+  - slug: sanfrancisco-to
+    place: San Francisco
+    collection: San Francisco To
+    title: San Francisco To
+    tone: light

@@ -1,0 +1,23 @@
+---
+// Small stroke icons, 1.5 px, currentColor. Kept inline so the site makes no icon requests.
+interface Props { name: string; size?: number; class?: string }
+const { name, size = 16, class: cls } = Astro.props;
+const paths: Record<string, string> = {
+  instagram: `<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor" stroke="none"/>`,
+  xiaohongshu: `<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h4v6H7zM13 9h4M15 9v6M13 15h4"/>`,
+  map: `<path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/>`,
+  afterframe: `<circle cx="12" cy="12" r="9"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/><circle cx="12" cy="12" r="2.5"/>`,
+  link: `<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1-1"/>`,
+  sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`,
+  moon: `<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>`,
+  chevron: `<path d="M6 9l6 6 6-6"/>`,
+  close: `<path d="M6 6l12 12M18 6L6 18"/>`,
+  menu: `<path d="M4 7h16M4 12h16M4 17h16"/>`,
+  left: `<path d="M15 5l-7 7 7 7"/>`,
+  right: `<path d="M9 5l7 7-7 7"/>`,
+  arrowRight: `<path d="M5 12h14M13 6l6 6-6 6"/>`,
+  arrowLeft: `<path d="M19 12H5M11 6l-6 6 6 6"/>`,
+};
+const d = paths[name] ?? paths.link;
+---
+<svg class={cls} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={d} />

@@ -1,0 +1,450 @@
+[
+ {
+  "file": "tokyo-night-00.webp",
+  "gallery": "tokyo-night",
+  "idx": 0,
+  "w": 1425,
+  "h": 2000,
+  "stem": "IMG_0678.jpg"
+ },
+ {
+  "file": "tokyo-night-01.webp",
+  "gallery": "tokyo-night",
+  "idx": 1,
+  "w": 2000,
+  "h": 1296,
+  "stem": "IMG_0670.jpg"
+ },
+ {
+  "file": "tokyo-night-02.webp",
+  "gallery": "tokyo-night",
+  "idx": 2,
+  "w": 2000,
+  "h": 1333,
+  "stem": "IMG_0682.jpg"
+ },
+ {
+  "file": "tokyo-night-03.webp",
+  "gallery": "tokyo-night",
+  "idx": 3,
+  "w": 2000,
+  "h": 1036,
+  "stem": "IMG_0785.jpg"
+ },
+ {
+  "file": "tokyo-night-04.webp",
+  "gallery": "tokyo-night",
+  "idx": 4,
+  "w": 2000,
+  "h": 1229,
+  "stem": "IMG_0708.jpg"
+ },
+ {
+  "file": "tokyo-night-05.webp",
+  "gallery": "tokyo-night",
+  "idx": 5,
+  "w": 2000,
+  "h": 1112,
+  "stem": "IMG_0792.jpg"
+ },
+ {
+  "file": "tokyo-night-06.webp",
+  "gallery": "tokyo-night",
+  "idx": 6,
+  "w": 2000,
+  "h": 1036,
+  "stem": "IMG_0785-2.jpg"
+ },
+ {
+  "file": "tokyo-night-07.webp",
+  "gallery": "tokyo-night",
+  "idx": 7,
+  "w": 2000,
+  "h": 1333,
+  "stem": "IMG_0760.jpg"
+ },
+ {
+  "file": "sanfrancisco-00.webp",
+  "gallery": "sanfrancisco",
+  "idx": 0,
+  "w": 2000,
+  "h": 1316,
+  "stem": "_MG_8014.jpg"
+ },
+ {
+  "file": "sanfrancisco-01.webp",
+  "gallery": "sanfrancisco",
+  "idx": 1,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_8012-2.jpg"
+ },
+ {
+  "file": "sanfrancisco-02.webp",
+  "gallery": "sanfrancisco",
+  "idx": 2,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_9129.jpg"
+ },
+ {
+  "file": "sanfrancisco-03.webp",
+  "gallery": "sanfrancisco",
+  "idx": 3,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_9130.jpg"
+ },
+ {
+  "file": "sanfrancisco-04.webp",
+  "gallery": "sanfrancisco",
+  "idx": 4,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_9133.jpg"
+ },
+ {
+  "file": "sanfrancisco-05.webp",
+  "gallery": "sanfrancisco",
+  "idx": 5,
+  "w": 2000,
+  "h": 1388,
+  "stem": "_MG_9098.jpg"
+ },
+ {
+  "file": "sanfrancisco-06.webp",
+  "gallery": "sanfrancisco",
+  "idx": 6,
+  "w": 2000,
+  "h": 1316,
+  "stem": "_MG_9124-2.jpg"
+ },
+ {
+  "file": "sanfrancisco-07.webp",
+  "gallery": "sanfrancisco",
+  "idx": 7,
+  "w": 2000,
+  "h": 1316,
+  "stem": "_MG_8014.jpg"
+ },
+ {
+  "file": "shanghai-i-00.webp",
+  "gallery": "shanghai-i",
+  "idx": 0,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4935.jpg"
+ },
+ {
+  "file": "shanghai-i-01.webp",
+  "gallery": "shanghai-i",
+  "idx": 1,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4967.jpg"
+ },
+ {
+  "file": "shanghai-i-02.webp",
+  "gallery": "shanghai-i",
+  "idx": 2,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4958.jpg"
+ },
+ {
+  "file": "shanghai-i-03.webp",
+  "gallery": "shanghai-i",
+  "idx": 3,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4953.jpg"
+ },
+ {
+  "file": "shinjuku-00.webp",
+  "gallery": "shinjuku",
+  "idx": 0,
+  "w": 4761,
+  "h": 3559,
+  "stem": "IMG_9687.jpg"
+ },
+ {
+  "file": "shinjuku-01.webp",
+  "gallery": "shinjuku",
+  "idx": 1,
+  "w": 4784,
+  "h": 3648,
+  "stem": "IMG_9688.jpg"
+ },
+ {
+  "file": "shinjuku-02.webp",
+  "gallery": "shinjuku",
+  "idx": 2,
+  "w": 5162,
+  "h": 3648,
+  "stem": "IMG_9761.jpg"
+ },
+ {
+  "file": "shinjuku-03.webp",
+  "gallery": "shinjuku",
+  "idx": 3,
+  "w": 5469,
+  "h": 3646,
+  "stem": "IMG_9760-2.jpg"
+ },
+ {
+  "file": "amusement-park-00.webp",
+  "gallery": "amusement-park",
+  "idx": 0,
+  "w": 2000,
+  "h": 1450,
+  "stem": "IMG_4168.jpg"
+ },
+ {
+  "file": "aviation-00.webp",
+  "gallery": "aviation",
+  "idx": 0,
+  "w": 6720,
+  "h": 4480,
+  "stem": "_MG_5772.jpeg"
+ },
+ {
+  "file": "lights-00.webp",
+  "gallery": "lights",
+  "idx": 0,
+  "w": 2000,
+  "h": 734,
+  "stem": "_MG_4949.jpg"
+ },
+ {
+  "file": "los-angeles-i-00.webp",
+  "gallery": "los-angeles-i",
+  "idx": 0,
+  "w": 1333,
+  "h": 2000,
+  "stem": "_MG_5588.jpg"
+ },
+ {
+  "file": "newcastle-00.webp",
+  "gallery": "newcastle",
+  "idx": 0,
+  "w": 2000,
+  "h": 1199,
+  "stem": "_MG_7663.jpg"
+ },
+ {
+  "file": "on-roppongi-hills-00.webp",
+  "gallery": "on-roppongi-hills",
+  "idx": 0,
+  "w": 2000,
+  "h": 1115,
+  "stem": "IMG_0491.jpg"
+ },
+ {
+  "file": "pacifica-00.webp",
+  "gallery": "pacifica",
+  "idx": 0,
+  "w": 11556,
+  "h": 7444,
+  "stem": "B0005744.jpg"
+ },
+ {
+  "file": "sanfrancisco-sunset-00.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 0,
+  "w": 5727,
+  "h": 4104,
+  "stem": "_MG_3113+copy+2.jpeg"
+ },
+ {
+  "file": "sanfrancisco-to-00.webp",
+  "gallery": "sanfrancisco-to",
+  "idx": 0,
+  "w": 6210,
+  "h": 4114,
+  "stem": "IMG_0608-2-DeNoiseAI-low-light.jpg"
+ },
+ {
+  "file": "shanghai-ii-00.webp",
+  "gallery": "shanghai-ii",
+  "idx": 0,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4466-2.jpg"
+ },
+ {
+  "file": "still-life-of-street-00.webp",
+  "gallery": "still-life-of-street",
+  "idx": 0,
+  "w": 4526,
+  "h": 4540,
+  "stem": "Frame+10+lowrs.jpg"
+ },
+ {
+  "file": "sunset-00.webp",
+  "gallery": "sunset",
+  "idx": 0,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_0246.jpg"
+ },
+ {
+  "file": "sanfrancisco-sunset-01.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 1,
+  "w": 4752,
+  "h": 3416,
+  "stem": "_MG_3039_2.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-02.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 2,
+  "w": 4557,
+  "h": 3360,
+  "stem": "_MG_4036.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-03.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 3,
+  "w": 5040,
+  "h": 3360,
+  "stem": "_MG_3956.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-04.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 4,
+  "w": 5040,
+  "h": 3360,
+  "stem": "_MG_3916.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-05.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 5,
+  "w": 3033,
+  "h": 4510,
+  "stem": "_MG_3773.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-06.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 6,
+  "w": 5040,
+  "h": 3360,
+  "stem": "_MG_3679.jpeg"
+ },
+ {
+  "file": "sanfrancisco-sunset-07.webp",
+  "gallery": "sanfrancisco-sunset",
+  "idx": 7,
+  "w": 4460,
+  "h": 2759,
+  "stem": "IMG_2047.jpeg"
+ },
+ {
+  "file": "aviation-01.webp",
+  "gallery": "aviation",
+  "idx": 1,
+  "w": 4899,
+  "h": 3099,
+  "stem": "_MG_0861.jpeg"
+ },
+ {
+  "file": "aviation-02.webp",
+  "gallery": "aviation",
+  "idx": 2,
+  "w": 5882,
+  "h": 3643,
+  "stem": "_MG_5137.jpeg"
+ },
+ {
+  "file": "aviation-03.webp",
+  "gallery": "aviation",
+  "idx": 3,
+  "w": 6720,
+  "h": 4169,
+  "stem": "_MG_5730.jpeg"
+ },
+ {
+  "file": "aviation-04.webp",
+  "gallery": "aviation",
+  "idx": 4,
+  "w": 6625,
+  "h": 4417,
+  "stem": "_MG_5260.jpeg"
+ },
+ {
+  "file": "aviation-05.webp",
+  "gallery": "aviation",
+  "idx": 5,
+  "w": 4676,
+  "h": 3021,
+  "stem": "_MG_5250.jpeg"
+ },
+ {
+  "file": "shanghai-i-04.webp",
+  "gallery": "shanghai-i",
+  "idx": 4,
+  "w": 2000,
+  "h": 1457,
+  "stem": "_MG_4952.jpg"
+ },
+ {
+  "file": "shanghai-i-05.webp",
+  "gallery": "shanghai-i",
+  "idx": 5,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4950.jpg"
+ },
+ {
+  "file": "shanghai-i-06.webp",
+  "gallery": "shanghai-i",
+  "idx": 6,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4949.jpg"
+ },
+ {
+  "file": "shanghai-i-07.webp",
+  "gallery": "shanghai-i",
+  "idx": 7,
+  "w": 2000,
+  "h": 1333,
+  "stem": "_MG_4946.jpg"
+ },
+ {
+  "file": "pacifica-01.webp",
+  "gallery": "pacifica",
+  "idx": 1,
+  "w": 8539,
+  "h": 5568,
+  "stem": "B0005678.jpg"
+ },
+ {
+  "file": "pacifica-02.webp",
+  "gallery": "pacifica",
+  "idx": 2,
+  "w": 10828,
+  "h": 6773,
+  "stem": "B0005697.jpg"
+ },
+ {
+  "file": "pacifica-03.webp",
+  "gallery": "pacifica",
+  "idx": 3,
+  "w": 11464,
+  "h": 7085,
+  "stem": "B0005738.jpg"
+ },
+ {
+  "file": "pacifica-04.webp",
+  "gallery": "pacifica",
+  "idx": 4,
+  "w": 11556,
+  "h": 7444,
+  "stem": "B0005744.jpg"
+ }
+]

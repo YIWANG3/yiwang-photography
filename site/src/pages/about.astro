@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+import Icon from "../components/Icon.astro";
+import { site } from "../lib/data.js";
+const links = site.links ?? [];
+---
+<Base title="About" current="about">
+  <h1 class="page-title">About</h1>
+  <div class="prose">
+    <p>Yi Wang photographs cities at the hours when they stop pretending: late evenings in Tokyo and Shanghai, early light over San Francisco.</p>
+    <p>The photographs here are organised as series, one per trip or subject, in the order they were taken.</p>
+    {links.length > 0 && (
+      <p class="m" style="display:flex;flex-wrap:wrap;gap:8px 20px">
+        {links.map((l) => <a href={l.url} target="_blank" rel="noopener me" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none"><Icon name={l.icon} size={14} />{l.label}</a>)}
+      </p>
+    )}
+    <p class="m">This paragraph is placeholder copy for the prototype.</p>
+    {site.exif_mock && <p class="m">Prototype note: the camera data shown under photographs is generated, not real. It will come from the catalogue once publishing is wired to AfterFrame.</p>}
+  </div>
+</Base>

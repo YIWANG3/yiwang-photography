@@ -1,0 +1,63 @@
+---
+import Base from "../layouts/Base.astro";
+import Pic from "../components/Pic.astro";
+import Lightbox from "../components/Lightbox.astro";
+import { allGalleries, galleries, exifLine } from "../lib/data.js";
+
+export function getStaticPaths() {
+  return allGalleries.map((g) => ({ params: { slug: g.slug }, props: { gallery: g } }));
+}
+const { gallery: g } = Astro.props;
+const visible = galleries;
+const pos = visible.findIndex((x) => x.slug === g.slug);
+const prev = pos > 0 ? visible[pos - 1] : null;
+const next = pos >= 0 && pos < visible.length - 1 ? visible[pos + 1] : null;
+
+// Two portraits in a row share a row; everything else stands alone.
+const rows: Array<{ kind: "one" | "pair"; items: any[] }> = [];
+for (let i = 0; i < g.items.length; i++) {
+  const a = g.items[i], b = g.items[i + 1];
+  if (a.shape === "portrait" && b && b.shape === "portrait") { rows.push({ kind: "pair", items: [a, b] }); i++; }
+  else rows.push({ kind: "one", items: [a] });
+}
+const pad = (n: number) => String(n).padStart(2, "0");
+const indexOf = (it: any) => g.items.indexOf(it);
+const exposure = (it: any) => exifLine(it.exif).slice(2, 3);
+---
+<Base title={g.title} tone={g.tone} current={g.slug} description={g.description || `${g.title}, a series of ${g.count} photographs by Yi Wang.`}>
+  <header class="series-head">
+    <h1>{g.title}</h1>
+    <p class="meta">Series of {g.count}{g.year ? ` · ${g.year}` : ""}</p>
+    {g.description && <p class="desc">{g.description}</p>}
+  </header>
+
+  <div class="flow" id="flow">
+    {rows.map((row) =>
+      row.kind === "pair" ? (
+        <div class="pair">
+          {row.items.map((it) => (
+            <figure class="fig">
+              <Pic item={it} sizes="(max-width: 640px) 100vw, min(50vw, 700px)" lightbox index={indexOf(it)} loading={indexOf(it) < 2 ? "eager" : "lazy"} />
+              <figcaption><span class="n">{pad(indexOf(it) + 1)} / {pad(g.count)}</span>{exposure(it).map((s) => <span>{s}</span>)}</figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <figure class="fig">
+          <Pic item={row.items[0]} sizes="(max-width: 900px) 100vw, min(calc(100vw - 330px), 1400px)" lightbox index={indexOf(row.items[0])} loading={indexOf(row.items[0]) < 2 ? "eager" : "lazy"} fetchpriority={indexOf(row.items[0]) === 0 ? "high" : "auto"} />
+          <figcaption><span class="n">{pad(indexOf(row.items[0]) + 1)} / {pad(g.count)}</span>{exposure(row.items[0]).map((s) => <span>{s}</span>)}</figcaption>
+        </figure>
+      )
+    )}
+  </div>
+
+  <nav class="series-foot" aria-label="Series">
+    <a class="prev" href={prev ? `/${prev.slug}/` : "/"}><span><span class="k">Previous</span><span>{prev ? prev.title : "All series"}</span></span></a>
+    <a class="next" href={next ? `/${next.slug}/` : "/"}><span><span class="k">Next</span><span>{next ? next.title : "All series"}</span></span></a>
+  </nav>
+
+  <Lightbox />
+  <script>
+    import "../scripts/lightbox.js";
+  </script>
+</Base>

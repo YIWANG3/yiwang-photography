@@ -1,0 +1,131 @@
+---
+import "@fontsource/poppins/300.css";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Icon from "../components/Icon.astro";
+import { site, galleries } from "../lib/data.js";
+
+interface Props { title?: string; description?: string; tone?: "light" | "dark"; current?: string }
+const { title, description = "Photographs by Yi Wang.", tone = "light", current } = Astro.props;
+const fullTitle = title ? `${title} · ${site.title}` : site.title;
+const isCur = (key: string) => (current === key ? "page" : undefined);
+const links = site.links ?? [];
+
+---
+<!doctype html>
+<html lang="en" data-tone={tone}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1011" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <ClientRouter />
+    <script is:inline>
+      // Runs before paint: explicit choice > page tone > system. theme-toggle.js re-applies it after client navigations.
+      (function () {
+        var pref = null;
+        try { pref = localStorage.getItem("theme"); } catch (e) {}
+        var tone = document.documentElement.dataset.tone;
+        var sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = pref === "light" || pref === "dark" ? pref : (tone === "dark" ? "dark" : sys);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="index" transition:persist="index" aria-label="Archive">
+        <a class="wordmark" href="/">{site.title}</a>
+
+        <nav class="index-series" aria-label="Series">
+          <div class="index-label">Series</div>
+          <div class="index-scroll">
+            <ul class="series-list" data-series-list>
+              {galleries.map((g) => (
+                <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name">{g.title}</span><span class="n">{g.count}</span></a></li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        <div class="index-foot">
+          <nav class="pages" aria-label="Pages">
+            <a href="/" data-slug="work" aria-current={isCur("work")}>All series</a>
+            <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}>Recent</a>
+            <a href="/map/" data-slug="map" aria-current={isCur("map")}>Map</a>
+            <a href="/about/" data-slug="about" aria-current={isCur("about")}>About</a>
+          </nav>
+          {links.length > 0 && (
+            <nav class="elsewhere" aria-label="Elsewhere">
+              {links.map((l) => (
+                <a href={l.url} target="_blank" rel="noopener me"><Icon name={l.icon} size={15} /><span>{l.label}</span></a>
+              ))}
+            </nav>
+          )}
+          <div class="row">
+            <span class="copyright">© {new Date().getFullYear()} {site.title}</span>
+            <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" title="Light / dark">
+              <Icon name="sun" size={15} class="ic-sun" /><Icon name="moon" size={15} class="ic-moon" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar" transition:persist="topbar">
+          <div class="row">
+            <a class="wordmark" href="/">{site.title}</a>
+            <button type="button" class="menu-btn" data-side-open aria-label="Open menu" aria-controls="side"><Icon name="menu" size={22} /></button>
+          </div>
+        </header>
+        <div class="side" id="side" transition:persist="side" aria-hidden="true">
+          <div class="side-backdrop" data-side-close></div>
+          <div class="side-panel" role="dialog" aria-modal="true" aria-label="Menu">
+            <div class="side-head">
+              <a class="wordmark" href="/">{site.title}</a>
+              <button type="button" class="ib" data-side-close aria-label="Close menu"><Icon name="close" size={20} /></button>
+            </div>
+            <div class="side-scroll">
+              <nav aria-label="Series">
+                <div class="index-label">Series</div>
+                <ul class="series-list" data-series-list>
+                  {galleries.map((g) => (
+                    <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name">{g.title}</span><span class="n">{g.count}</span></a></li>
+                  ))}
+                </ul>
+              </nav>
+              <nav class="pages" aria-label="Pages">
+                <a href="/" data-slug="work" aria-current={isCur("work")}>All series</a>
+                <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}>Recent</a>
+                <a href="/map/" data-slug="map" aria-current={isCur("map")}>Map</a>
+                <a href="/about/" data-slug="about" aria-current={isCur("about")}>About</a>
+              </nav>
+              {links.length > 0 && (
+                <nav class="elsewhere" aria-label="Elsewhere">
+                  {links.map((l) => (
+                    <a href={l.url} target="_blank" rel="noopener me"><Icon name={l.icon} size={16} /><span>{l.label}</span></a>
+                  ))}
+                </nav>
+              )}
+            </div>
+            <div class="side-foot">
+              <span class="copyright">© {new Date().getFullYear()} {site.title}</span>
+              <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" title="Light / dark">
+                <Icon name="sun" size={16} class="ic-sun" /><Icon name="moon" size={16} class="ic-moon" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <main data-current={current}><slot /></main>
+      </div>
+    </div>
+    <script>
+      import "../scripts/theme-toggle.js";
+    </script>
+  </body>
+</html>
