@@ -1,6 +1,8 @@
 // render: originals → content-addressed WebP ladder + manifest.json.
 // Rules (docs/plan.md §4.3): auto-rotate, convert to sRGB and strip metadata (sharp's default), never enlarge,
 // ladder 480/1200/2000/3200 plus the source's own long edge when it falls between rungs, q80 for 480 and q82 above.
+// Camera data and coordinates come from the source index (on-site.photos, later AfterFrame); photos without any
+// get null, or placeholders when --mock is passed (dev only: the site says so in the legend).
 import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -9,25 +11,29 @@ import sharp from "sharp";
 import YAML from "yaml";
 import { GalleriesConfig, Manifest } from "./manifest.mjs";
 import { readIndex } from "./sources/squarespace.mjs";
+import { readOnsiteOverrides } from "./sources/onsite.mjs";
 
 export const RENDER_VERSION = 1;
 const LADDER = [480, 1200, 2000, 3200];
 const CONCURRENCY = 4;
 
-export async function render({ cacheDir, galleries: galleriesPath, outDir, manifest: manifestPath, imageBase, force, log = console.log }) {
+export async function render({ cacheDir, galleries: galleriesPath, outDir, manifest: manifestPath, imageBase, force, mock = false, log = console.log }) {
   const config = GalleriesConfig.parse(YAML.parse(await readFile(galleriesPath, "utf8")));
   await mkdir(outDir, { recursive: true });
   await mkdir(path.dirname(manifestPath), { recursive: true });
+  const overrides = await readOnsiteOverrides(cacheDir);
 
   const galleries = [];
   const recent = [];
-  let rendered = 0, reused = 0;
+  let rendered = 0, reused = 0, mocked = 0;
 
   for (const g of config.galleries) {
     const index = await readIndex(cacheDir, g.source ?? g.slug);
     if (!index) { log(`  ${g.slug}: no originals in cache, skipped`); continue; }
-    const items = new Array(index.items.length);
-    await runPool(index.items.map((it, i) => async () => {
+    // An on-site image that is also a gallery photo is published once, as that gallery photo.
+    const sourceItems = index.items.filter((it) => !it.match);
+    const items = new Array(sourceItems.length);
+    await runPool(sourceItems.map((it, i) => async () => {
       const file = path.join(cacheDir, index.slug, it.file);
       const buf = await readFile(file);
       const id = createHash("sha1").update(buf).update(`v${RENDER_VERSION}`).digest("hex").slice(0, 12);
@@ -49,39 +55,46 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
         rendered++;
         outputs.push(s);
       }
+      // Real data: the item's own (on-site source) or the on-site match for this gallery photo.
+      const real = it.geo || it.exif ? it : overrides.get(`${g.source ?? g.slug}/${it.file}`);
+      const isMock = !real && mock;
+      if (isMock) mocked++;
       items[i] = {
         id, w, h,
         shape: w > h * 1.05 ? "landscape" : h > w * 1.05 ? "portrait" : "square",
         sizes: outputs,
         alt: it.alt && !/\.(jpe?g|png)$/i.test(it.alt) ? it.alt : "",
-        // Squarespace strips EXIF; until the AfterFrame source fills this from get_asset we mock it
-        // deterministically from the id so the layout can be judged. manifest.site.exif_mock says so.
-        exif: mockExif(id, g),
-        geo: mockGeo(id, g),
+        exif: real?.exif ?? (isMock ? mockExif(id, g) : null),
+        geo: real?.geo ?? (isMock ? mockGeo(id, g) : null),
+        place: real?.place ?? null,
+        taken: real?.taken ?? null,
+        mock: isMock,
       };
     }), CONCURRENCY);
 
     if (g.order === "captured_desc") items.reverse();
-    const coverId = g.cover ? items.find((it, i) => index.items[i].stem === g.cover)?.id : undefined;
+    const coverId = g.cover ? items.find((it, i) => sourceItems[i].stem === g.cover)?.id : undefined;
     galleries.push({
       slug: g.slug, title: g.title, year: g.year ?? null, place: g.place ?? null, tone: g.tone, description: g.description ?? "",
       hidden: g.hidden ?? false, cover: coverId ?? items[0].id, count: items.length, items,
     });
-    recent.push(...items.slice(0, 3).map((it) => it.id));
-    log(`  ${g.slug}: ${items.length} photos`);
+    if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
+    log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${items.filter((it) => it.geo && !it.mock).length} with real location`);
   }
 
   const manifest = Manifest.parse({
     version: 1,
     generated_at: new Date().toISOString(),
-    site: { title: config.site.title, image_base: imageBase, exif_mock: true, geo_mock: true, links: config.site.links },
+    site: { title: config.site.title, image_base: imageBase, exif_mock: mocked > 0, geo_mock: mocked > 0, links: config.site.links },
     galleries,
     recent,
   });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 1));
-  log(`manifest: ${galleries.length} galleries, ${galleries.reduce((n, g) => n + g.count, 0)} photos; rendered ${rendered}, reused ${reused} files → ${path.relative(process.cwd(), manifestPath)}`);
+  const all = galleries.flatMap((g) => g.items);
+  log(`manifest: ${galleries.length} galleries, ${all.length} photos (${all.filter((it) => it.geo && !it.mock).length} located, ${mocked} mocked); rendered ${rendered}, reused ${reused} files → ${path.relative(process.cwd(), manifestPath)}`);
 }
 
+// --mock placeholders (dev only): deterministic from the id so layouts can be judged before real data exists.
 const MOCK_KITS = [
   { camera: "Canon EOS R5", lenses: [["RF 35mm F1.8", 35], ["RF 50mm F1.2 L", 50], ["RF 24-70mm F2.8 L", 24], ["RF 70-200mm F2.8 L", 135]] },
   { camera: "Sony α7R IV", lenses: [["FE 35mm F1.4 GM", 35], ["FE 85mm F1.4 GM", 85], ["FE 16-35mm F2.8 GM", 16], ["FE 200-600mm", 400]] },
@@ -108,7 +121,6 @@ function mockExif(id, gallery) {
   };
 }
 
-// Mock coordinates: each series scatters a few kilometres around its city until AfterFrame supplies real ones.
 const MOCK_CENTERS = {
   "tokyo-night": [35.6586, 139.7454], shinjuku: [35.6938, 139.7034], "on-roppongi-hills": [35.6605, 139.7292], lights: [35.6762, 139.6503],
   "shanghai-i": [31.2304, 121.4737], "shanghai-ii": [31.2397, 121.4998],

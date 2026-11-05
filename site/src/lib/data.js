@@ -25,6 +25,21 @@ export function pick(item, targetWidth) {
   return item.sizes.find((w) => w >= targetWidth) ?? largest(item);
 }
 
+// The exposure triplet on its own, for captions.
+export function exposure(exif) {
+  if (!exif) return "";
+  const exp = [];
+  if (exif.focal) exp.push(`${exif.focal}mm`);
+  if (exif.aperture) exp.push(`ƒ/${exif.aperture}`);
+  if (exif.shutter) exp.push(`${exif.shutter}s`.replace('"s', '"'));
+  if (exif.iso) exp.push(`ISO ${exif.iso}`);
+  return exp.join(" · ");
+}
+// Everything the lightbox shows under a photo: place first, then camera, lens, exposure, month.
+export function detailLine(item) {
+  return [item.place, ...exifLine(item.exif)].filter(Boolean).join(" · ");
+}
+
 export function exifLine(exif) {
   if (!exif) return [];
   const parts = [];

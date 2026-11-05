@@ -17,7 +17,7 @@ export const GalleriesConfig = z.object({
     collection: z.string().optional(),   // AfterFrame collection name (exact), unused by the Squarespace source
     source: z.string().optional(),       // cache folder when it differs from slug
     year: z.number().int().optional(),
-    place: z.string().optional(),       // groups series in the left index
+    place: z.string().optional(),       // city/region label (unused by the site today)
     tone: Tone.default("light"),
     order: z.enum(["captured_asc", "captured_desc", "manual"]).default("captured_asc"),
     cover: z.string().optional(),        // file stem
@@ -51,6 +51,9 @@ export const Item = z.object({
   alt: z.string(),
   exif: Exif,
   geo: Geo.default(null),
+  place: z.string().nullable().default(null),   // "Monterey, California": from the source, shown with the photo
+  taken: z.string().nullable().default(null),   // ISO timestamp when known (sorting, never shown finer than YYYY-MM)
+  mock: z.boolean().default(false),             // exif/geo are --mock placeholders (dev builds only)
 });
 
 export const Manifest = z.object({

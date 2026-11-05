@@ -97,7 +97,7 @@ async function init() {
 
   const markers = points.map((p) => {
     const m = new google.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon: dotIcon(PIN), title: p.series, optimized: true });
-    m.addListener("click", () => showStrip([p], p.series));
+    m.addListener("click", () => showStrip([p], p.label));
     m.__p = p;
     return m;
   });
@@ -135,7 +135,7 @@ async function init() {
     onClusterClick(_e, cluster, m) {
       if (m.getZoom() >= 16) {
         const ps = cluster.markers.map((mk) => mk.__p);
-        showStrip(ps, ps.every((p) => p.slug === ps[0].slug) ? ps[0].series : `${ps.length} photographs`);
+        showStrip(ps, ps.every((p) => p.label === ps[0].label) ? ps[0].label : ps.every((p) => p.slug === ps[0].slug) ? ps[0].series : `${ps.length} photographs`);
       } else {
         m.fitBounds(cluster.bounds, 80);
       }
@@ -149,8 +149,8 @@ async function init() {
     strip.replaceChildren(...ps.map((p, i) => {
       const b = document.createElement("button");
       b.type = "button";
-      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${p.series}" loading="lazy" decoding="async"><span>${p.series}</span>`;
-      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: q.exif, alt: q.series, title: q.series })), i));
+      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${p.label}" loading="lazy" decoding="async"><span>${p.label}</span>`;
+      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: q.exif, alt: q.label, title: q.label })), i));
       return b;
     }));
     panel.hidden = false;

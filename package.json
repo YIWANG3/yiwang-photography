@@ -11,6 +11,7 @@
   },
   "scripts": {
     "import:squarespace": "node publisher/bin/publish.mjs import-squarespace",
+    "import:onsite": "node publisher/bin/publish.mjs import-onsite",
     "render": "node publisher/bin/publish.mjs render",
     "sync-images": "node publisher/bin/publish.mjs sync-images",
     "deploy": "node publisher/bin/publish.mjs deploy",

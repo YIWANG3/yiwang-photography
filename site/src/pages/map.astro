@@ -1,12 +1,13 @@
 ---
 import Base from "../layouts/Base.astro";
 import Lightbox from "../components/Lightbox.astro";
-import { galleries, site, src, exifLine } from "../lib/data.js";
+import { allGalleries, site, src, detailLine } from "../lib/data.js";
 
-// Every published photo with a location, in series order. The map script reads this JSON; nothing is fetched.
-const points = galleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
+// Every photo with a location, hidden galleries included (the on-site archive is map-only). The map script
+// reads this JSON; nothing is fetched. label = the place when known, else the series.
+const points = allGalleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
   id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes,
-  thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, exif: exifLine(it.exif).join(" · "),
+  thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, label: it.place || g.title, exif: detailLine(it),
 })));
 const key = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY ?? "";
 ---

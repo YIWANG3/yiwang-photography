@@ -1,5 +1,5 @@
 ---
-import { src, srcset, pick, exifLine } from "../lib/data.js";
+import { src, srcset, pick, detailLine } from "../lib/data.js";
 interface Props {
   item: any;
   sizes: string;
@@ -18,7 +18,7 @@ const data = lightbox ? {
   "data-lb-w": item.w,
   "data-lb-h": item.h,
   "data-lb-index": index,
-  "data-lb-exif": exifLine(item.exif).join(" · "),
+  "data-lb-exif": detailLine(item),
 } : {};
 ---
 <img

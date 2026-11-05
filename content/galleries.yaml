@@ -1,7 +1,7 @@
 # Which AfterFrame collections become galleries, and how the site presents them.
 # Order here is the order on the home page. Titles came from the old slugs; edit freely.
 # tone: dark makes the whole page dark for that series (a visitor's explicit theme choice still wins).
-# place groups series in the left index; the first series of a place sets the group's position.
+# hidden: true keeps a gallery out of the index, home and Recent; its photos still appear on the map.
 site:
   title: yi.wang photography
   # External links, in display order. icon is one of: instagram, xiaohongshu, map, afterframe, link
@@ -94,3 +94,10 @@ galleries:
     collection: San Francisco To
     title: San Francisco To
     tone: light
+  # on-site.photos archive: map-only. Its images that also appear in a gallery above are published as that
+  # gallery photo (matched by hash at import), with the real location and camera data attached.
+  - slug: on-site
+    title: On Site
+    description: Photographs placed by where they were taken.
+    hidden: true
+    order: captured_desc
