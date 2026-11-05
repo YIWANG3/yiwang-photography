@@ -47,10 +47,14 @@ async function init() {
   const thumbs = new Map();
   // Thumbnails are drawn onto a canvas, so a CDN-hosted image must be fetched with CORS (the R2 bucket allows
   // the site's origins); without it the canvas would be tainted and the icon could not be exported.
+  // The gallery pages load the same files without CORS and the browser may reuse that cached response for a
+  // CORS request and fail it, so the canvas copy uses its own URL (a query string, which R2 ignores).
   const loadThumb = (url) => thumbs.get(url) ?? thumbs.set(url, new Promise((res) => {
     const im = new Image(); im.decoding = "async";
-    if (new URL(url, location.href).origin !== location.origin) im.crossOrigin = "anonymous";
-    im.onload = () => res(im); im.onerror = () => res(null); im.src = url;
+    const cross = new URL(url, location.href).origin !== location.origin;
+    if (cross) im.crossOrigin = "anonymous";
+    im.onload = () => res(im); im.onerror = () => res(null);
+    im.src = cross ? `${url}${url.includes("?") ? "&" : "?"}canvas` : url;
   })).get(url);
 
   function ring() { return isDark() ? "#2a2b2e" : "#ffffff"; }
