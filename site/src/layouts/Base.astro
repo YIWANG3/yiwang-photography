@@ -24,7 +24,9 @@ const links = site.links ?? [];
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f1011" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="96x96" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <ClientRouter />
     <script is:inline>
       // Runs before paint: explicit choice > page tone > system. theme-toggle.js re-applies it after client navigations.
