@@ -163,6 +163,7 @@ img[loading] { opacity: 1; }
 .grid img { position: absolute; inset: 8%; width: 84%; height: 84%; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .14)); }
 .prose { max-width: var(--measure); display: grid; gap: 16px; font-size: 14px; font-weight: 300; }
 .prose .m { color: var(--muted); font-size: 13px; }
+.prose h2 { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 12px; }
 .prose a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
 .prose a:hover { text-decoration-color: currentColor; }
 .page-title { font-size: clamp(20px, 2.4vw, 26px); font-weight: 500; letter-spacing: 0; margin-bottom: clamp(18px, 3vw, 32px); }

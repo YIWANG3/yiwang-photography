@@ -8,13 +8,14 @@ const links = site.links ?? [];
   <h1 class="page-title">About</h1>
   <div class="prose">
     <p>Yi Wang photographs cities at the hours when they stop pretending: late evenings in Tokyo and Shanghai, early light over San Francisco.</p>
-    <p>The photographs here are organised as series, one per trip or subject, in the order they were taken.</p>
+    <p>The photographs here are organised as series, one per trip or subject.</p>
     {links.length > 0 && (
       <p class="m" style="display:flex;flex-wrap:wrap;gap:8px 20px">
         {links.map((l) => <a href={l.url} target="_blank" rel="noopener me" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none"><Icon name={l.icon} size={14} />{l.label}</a>)}
       </p>
     )}
-    <p class="m">This paragraph is placeholder copy for the prototype.</p>
+    <h2>Projects</h2>
+    <p><a href="https://yiwang3.github.io/AfterFrame/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px"><Icon name="afterframe" size={14} />AfterFrame</a> — a local-first photo workspace for browsing, organising and editing large libraries, which Yi builds and uses; the series on this site are selected in it. Free and open source.</p>
     {site.exif_mock && <p class="m">Prototype note: the camera data shown under photographs is generated, not real. It will come from the catalogue once publishing is wired to AfterFrame.</p>}
   </div>
 </Base>

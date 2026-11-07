@@ -19,7 +19,8 @@ import { readOnsiteOverrides } from "./sources/onsite.mjs";
 export const RENDER_VERSION = 1;
 const LADDER = [480, 1200, 2000, 3200, 6000];
 const CONCURRENCY = 4;
-const DARK_BELOW = 80; // median mean-luminance (0–255) under which a series is presented on a dark page
+const DARK_BELOW = 80;
+const RECENT = 36, RECENT_PER_SERIES = 3; // Recent = the newest dated photos, no series taking more than its share // median mean-luminance (0–255) under which a series is presented on a dark page
 
 export async function render({ cacheDir, galleries: galleriesPath, outDir, manifest: manifestPath, imageBase, force, mock = false, log = console.log }) {
   const config = GalleriesConfig.parse(YAML.parse(await readFile(galleriesPath, "utf8")));
@@ -102,7 +103,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
       hidden: g.hidden ?? false, cover: coverId ?? items[0].id, count: items.length, items,
     });
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
-    if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken })));
+    if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken, series: g.slug })));
     log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${tone}, ${items.filter((it) => it.geo && !it.mock).length} with real location${galleries.at(-1).gear.length ? ", " + galleries.at(-1).gear.join(" / ") : ""}`);
   }
 
@@ -111,12 +112,26 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     generated_at: new Date().toISOString(),
     site: { title: config.site.title, image_base: imageBase, exif_mock: mocked > 0, geo_mock: mocked > 0, links: config.site.links },
     galleries,
-    // Recent = the newest photographs by capture time once most of the archive carries one.
-    recent: [...new Set(dated.length >= recent.length ? dated.sort((a, b) => b.taken.localeCompare(a.taken)).map((d) => d.id) : recent)].slice(0, 36),
+    // Recent = the newest photographs by capture time, at most RECENT_PER_SERIES from any one series, once most
+    // of the archive carries a capture time.
+    recent: [...new Set(dated.length >= recent.length ? newest(dated) : recent)].slice(0, RECENT),
   });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 1));
   const all = galleries.flatMap((g) => g.items);
   log(`manifest: ${galleries.length} galleries, ${all.length} photos (${all.filter((it) => it.geo && !it.mock).length} located, ${mocked} mocked); rendered ${rendered}, reused ${reused} files → ${path.relative(process.cwd(), manifestPath)}`);
+}
+
+function newest(dated) {
+  const perSeries = new Map();
+  const out = [];
+  for (const d of [...dated].sort((a, b) => b.taken.localeCompare(a.taken))) {
+    const n = perSeries.get(d.series) ?? 0;
+    if (n >= RECENT_PER_SERIES) continue;
+    perSeries.set(d.series, n + 1);
+    out.push(d.id);
+    if (out.length === RECENT) break;
+  }
+  return out;
 }
 
 // The series to publish, in order: the AfterFrame import's galleries (sidebar order), each with its galleries.yaml
