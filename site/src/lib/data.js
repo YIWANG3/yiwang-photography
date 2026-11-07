@@ -25,6 +25,13 @@ export function pick(item, targetWidth) {
   return item.sizes.find((w) => w >= targetWidth) ?? largest(item);
 }
 
+// The year most of a series was taken, when its photographs carry dates (galleries.yaml's year wins).
+export function yearOf(items) {
+  const n = new Map();
+  for (const it of items) { const y = (it.exif?.taken || it.taken || "").slice(0, 4); if (/^\d{4}$/.test(y)) n.set(y, (n.get(y) ?? 0) + 1); }
+  return [...n].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
+
 // The exposure triplet on its own, for captions.
 export function exposure(exif) {
   if (!exif) return "";
@@ -35,7 +42,8 @@ export function exposure(exif) {
   if (exif.iso) exp.push(`ISO ${exif.iso}`);
   return exp.join(" · ");
 }
-// Everything the lightbox shows under a photo: place first, then camera, lens, exposure, month.
+// Everything the lightbox and the map show under a photo: place, exposure, month. The equipment is named
+// once per series (gear), not under every photograph.
 export function detailLine(item) {
   return [item.place, ...exifLine(item.exif)].filter(Boolean).join(" · ");
 }
@@ -43,8 +51,6 @@ export function detailLine(item) {
 export function exifLine(exif) {
   if (!exif) return [];
   const parts = [];
-  if (exif.camera) parts.push(exif.camera);
-  if (exif.lens) parts.push(exif.lens);
   const exp = [];
   if (exif.focal) exp.push(`${exif.focal}mm`);
   if (exif.aperture) exp.push(`ƒ/${exif.aperture}`);

@@ -1,20 +1,20 @@
 // on-site.photos source: the old map site's posts (MongoDB Atlas) and their originals (Cloudflare Images).
 // Produces .cache/originals/on-site/<imageId>.jpg + index.json like the other sources, with real coordinates,
-// address and EXIF per item. Images that are also in a Squarespace gallery are matched by perceptual hash so
-// render can give that gallery photo the real data instead of publishing the image twice.
+// address and EXIF per item. Images that are also in a gallery are matched by perceptual hash (rematchOnsite,
+// run after every gallery import) so render gives that gallery photo the real data instead of publishing twice.
 // Credentials are read from the old server's .env (ONSITE_SERVER_ENV); nothing is copied or printed.
 import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { MongoClient } from "mongodb";
 import sharp from "sharp";
-import { readIndex } from "./squarespace.mjs";
+import { readIndex, toHex, fromHex } from "../cache.mjs";
 
 export const ONSITE_SLUG = "on-site";
 const DOWNLOAD_CONCURRENCY = 6;
 const MATCH_THRESHOLD = 24; // dHash bits out of 256; verified by eye on this archive
 
-export async function importOnsite({ cacheDir, serverEnv, sqSources, log = console.log }) {
+export async function importOnsite({ cacheDir, serverEnv, log = console.log }) {
   const env = parseEnv(await readFile(serverEnv, "utf8"));
   for (const k of ["MONGO_URI", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"]) if (!env[k]) throw new Error(`${k} missing in ${serverEnv}`);
   const dir = path.join(cacheDir, ONSITE_SLUG);
@@ -45,26 +45,34 @@ export async function importOnsite({ cacheDir, serverEnv, sqSources, log = conso
   }));
   log(`on-site: ${downloaded} downloaded, ${items.length - downloaded} already cached`);
 
-  // Match against the other sources so duplicates become one photo with the real data.
+  for (const it of items) it.dhash = toHex(await dhash(path.join(dir, it.file)));
+  items.sort((a, b) => (b.taken ?? "").localeCompare(a.taken ?? "") || a.postIndex - b.postIndex);
+  await writeFile(path.join(dir, "index.json"), JSON.stringify({ slug: ONSITE_SLUG, imported_at: new Date().toISOString(), items }, null, 1));
+  return { posts: posts.length, images: items.length };
+}
+
+// Point each on-site image at the gallery photo it duplicates, if any, by perceptual hash. Gallery indexes
+// carry their items' hashes (the AfterFrame import computes them); the on-site index gets its own on first use.
+// Returns the number matched, or null when there is no on-site index.
+export async function rematchOnsite({ cacheDir, slugs, log = console.log }) {
+  const idx = await readIndex(cacheDir, ONSITE_SLUG);
+  if (!idx) return null;
   const others = [];
-  for (const slug of sqSources) {
-    const idx = await readIndex(cacheDir, slug);
-    if (!idx) continue;
-    for (const it of idx.items) others.push({ gallery: slug, file: it.file, hash: await dhash(path.join(cacheDir, idx.slug, it.file)) });
+  for (const slug of slugs) {
+    const g = await readIndex(cacheDir, slug);
+    for (const it of g?.items ?? []) if (it.dhash) others.push({ gallery: slug, file: it.file, hash: fromHex(it.dhash) });
   }
   let matched = 0;
-  for (const it of items) {
-    const h = await dhash(path.join(dir, it.file));
+  for (const it of idx.items) {
+    if (!it.dhash) it.dhash = toHex(await dhash(path.join(cacheDir, ONSITE_SLUG, it.file)));
+    const h = fromHex(it.dhash);
     let best = null;
     for (const o of others) { const d = hamming(h, o.hash); if (!best || d < best.d) best = { d, o }; }
     it.match = best && best.d <= MATCH_THRESHOLD ? { gallery: best.o.gallery, file: best.o.file, distance: best.d } : null;
     if (it.match) matched++;
   }
-  log(`on-site: ${matched} images also in a gallery (matched by hash), ${items.length - matched} map-only`);
-
-  items.sort((a, b) => (b.taken ?? "").localeCompare(a.taken ?? "") || a.postIndex - b.postIndex);
-  await writeFile(path.join(dir, "index.json"), JSON.stringify({ slug: ONSITE_SLUG, imported_at: new Date().toISOString(), items }, null, 1));
-  return { posts: posts.length, images: items.length, matched };
+  await writeFile(path.join(cacheDir, ONSITE_SLUG, "index.json"), JSON.stringify(idx, null, 1));
+  return matched;
 }
 
 async function fetchPosts(uri) {
@@ -125,8 +133,8 @@ export function isoFromExif(s) { // "2021:11:13 15:13:00" or already ISO
   const d = new Date(s); return Number.isNaN(+d) ? null : d.toISOString();
 }
 
-export async function dhash(file) {
-  const { data } = await sharp(file, { failOn: "none" }).rotate().grayscale().resize(17, 16, { fit: "fill" }).raw().toBuffer({ resolveWithObject: true });
+export async function dhash(fileOrBuffer) {
+  const { data } = await sharp(fileOrBuffer, { failOn: "none" }).rotate().grayscale().resize(17, 16, { fit: "fill" }).raw().toBuffer({ resolveWithObject: true });
   const bits = new Uint8Array(256);
   for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) bits[y * 16 + x] = data[y * 17 + x] < data[y * 17 + x + 1] ? 1 : 0;
   return bits;

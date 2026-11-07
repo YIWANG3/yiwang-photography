@@ -3,16 +3,21 @@
 Static portfolio site plus the publisher that turns curated photos into the site's inputs.
 AfterFrame stays read-only: it is where photos are selected; everything about publishing lives here.
 
-## Run the prototype locally
+## Run locally
 
 ```bash
 npm install
-npm run import:squarespace   # one-time: pulls the current Squarespace galleries into .cache/originals (2500 px, no EXIF)
+npm run import               # AfterFrame must be open: its folder collections → .cache/originals/<slug>/index.json
 npm run import:onsite        # one-time: the on-site.photos archive (real GPS, address, EXIF) → .cache/originals/on-site
-npm run import:originals     # find each gallery photo's exported original on local disks (Spotlight + hash) and keep its EXIF
 npm run render               # originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock for placeholders)
 npm run dev                  # http://127.0.0.1:4321
 ```
+
+`npm run import` talks to the running AfterFrame app over MCP (port 41706; `AFTERFRAME_MCP_PORT` or
+`afterframe.port` in galleries.yaml for a dev build). Every folder collection of the open catalog is a series,
+in the sidebar's order, titled by its name; the originals stay on disk and are read once each (content hash,
+size, perceptual hash, EXIF with GPS), so a second import only touches new photos. Publishing a new series =
+make a collection in AfterFrame, then `npm run import && npm run render && npm run deploy`.
 
 ## Deploy
 
@@ -23,15 +28,17 @@ npm run deploy               # images → R2, astro build against the CDN, dist 
 Needs the root `.env` (see `.env.example`) and `npx wrangler login`. Setup, domain move and the
 mainland-reachability check are in `docs/deploy.md`.
 
-`content/galleries.yaml` decides which series exist, their order, titles and `tone` (light / dark page).
-Squarespace exports carry no EXIF or GPS, so those photos show none; the on-site.photos import supplies real
-data for its 334 photographs (11 of them are also gallery photos and are published once, with that data).
-`npm run render -- --mock` fills the rest with placeholders for layout work; the site then says so.
+`content/galleries.yaml` holds what the site adds on top: collections to skip, display names for cameras and
+lenses (the series header names the equipment once), and per-series overrides (slug, title, tone, cover,
+description). A series' page is dark when its photographs are, unless `tone` says otherwise. Photos exported
+without EXIF show no data; the on-site.photos archive (334 photographs with real GPS and addresses) is map-only,
+and the ones that are also gallery photos are published once, as that gallery photo, with that data.
+`npm run render -- --mock` fills missing data with placeholders for layout work; the site then says so.
 
 ## Layout
 
 - `site/` Astro static site (pages, lightbox, theme toggle)
-- `publisher/` CLI: sources (Squarespace now, AfterFrame MCP next), sharp render, manifest schema
+- `publisher/` CLI: sources (AfterFrame over MCP, the on-site archive), EXIF reader, sharp render, manifest schema
 - `content/` galleries.yaml and about copy
 - `docs/plan.md` architecture, infrastructure, phases; `docs/design-research.md` reference sites and direction;
   `docs/prototypes/design-review.html` the published design review

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 // publish: the command-line entry for everything that turns curated photos into the site's inputs.
-//   import-squarespace   pull the current Squarespace galleries into .cache/originals (stop-gap source)
+//   import               read the open AfterFrame catalog's collections (the series) and their originals' EXIF
 //   import-onsite        pull the on-site.photos posts + originals into .cache/originals/on-site (real GPS/EXIF)
-//   import-originals     find each gallery photo's exported original on local disks (Spotlight) and keep its EXIF
 //   render               originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock: placeholders)
 //   sync-images          upload rendered images the R2 bucket does not have yet
 //   deploy               sync-images, build the site against the image CDN, push dist/ to Cloudflare Pages
@@ -10,10 +9,10 @@
 import path from "node:path";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { importSquarespace } from "../src/sources/squarespace.mjs";
-import { importOnsite, ONSITE_SLUG } from "../src/sources/onsite.mjs";
-import { enrichFromOriginals } from "../src/sources/originals.mjs";
+import { importAfterframe } from "../src/sources/afterframe.mjs";
+import { importOnsite } from "../src/sources/onsite.mjs";
 import { render } from "../src/render.mjs";
+import { GalleriesConfig } from "../src/manifest.mjs";
 import YAML from "yaml";
 import { r2Client, syncImages, buildSite, deployPages } from "../src/deploy.mjs";
 
@@ -40,20 +39,14 @@ const deployTarget = () => ({
 });
 
 try {
-  if (cmd === "import-squarespace") {
-    await importSquarespace({ origin: flags.origin || "https://yiwang.photography", cacheDir: paths.cacheDir });
+  if (cmd === "import") {
+    const config = GalleriesConfig.parse(YAML.parse(readFileSync(paths.galleries, "utf8")));
+    const port = Number(flags.port || env("AFTERFRAME_MCP_PORT", config.afterframe.port));
+    await importAfterframe({ cacheDir: paths.cacheDir, port, config });
   } else if (cmd === "import-onsite") {
     const serverEnv = flags["server-env"] || env("ONSITE_SERVER_ENV");
     if (!serverEnv) throw new Error("ONSITE_SERVER_ENV (path to the old photo-location-server .env) is not set");
-    const config = YAML.parse(readFileSync(paths.galleries, "utf8"));
-    const sqSources = config.galleries.map((g) => g.source ?? g.slug).filter((s) => s !== ONSITE_SLUG);
-    await importOnsite({ cacheDir: paths.cacheDir, serverEnv, sqSources });
-  } else if (cmd === "import-originals") {
-    const roots = String(flags.roots || env("ORIGINALS_ROOTS", "")).split(":").map((s) => s.trim()).filter(Boolean);
-    if (!roots.length) throw new Error("ORIGINALS_ROOTS (colon-separated folders to search, e.g. /Volumes/G-DRIVE PRO/Photography) is not set");
-    const config = YAML.parse(readFileSync(paths.galleries, "utf8"));
-    const sqSources = config.galleries.map((g) => g.source ?? g.slug).filter((s) => s !== ONSITE_SLUG);
-    await enrichFromOriginals({ cacheDir: paths.cacheDir, sqSources, roots, force: Boolean(flags.force) });
+    await importOnsite({ cacheDir: paths.cacheDir, serverEnv });
   } else if (cmd === "render") {
     await render({ ...paths, imageBase: flags["image-base"] || "/i", force: Boolean(flags.force), mock: Boolean(flags.mock) });
   } else if (cmd === "sync-images" || cmd === "deploy") {
@@ -68,7 +61,7 @@ try {
       if (!flags["skip-pages"] && !flags["dry-run"]) await deployPages({ root: ROOT, project: t.project, branch: t.branch });
     }
   } else {
-    console.error("usage: publish <import-squarespace|import-onsite|import-originals|render|sync-images|deploy> [--origin=URL] [--server-env=PATH] [--roots=A:B] [--image-base=/i] [--force] [--mock] [--dry-run] [--skip-images] [--skip-pages] [--branch=main]");
+    console.error("usage: publish <import|import-onsite|render|sync-images|deploy> [--port=41706] [--server-env=PATH] [--image-base=/i] [--force] [--mock] [--dry-run] [--skip-images] [--skip-pages] [--branch=main]");
     process.exit(2);
   }
 } catch (err) {

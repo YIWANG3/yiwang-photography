@@ -3,6 +3,14 @@
 > 2026-10-15 设计稿。原则（用户定）：**AfterFrame 只负责筛选，不加任何发布功能**；网站和发布链路全部在这个仓库。
 > 设计方向见 [design-research.md](design-research.md)。费用和大陆可达性的调研结论在第 7 节。
 
+> **2026-11-06 现状**：第 1–4 节的方案已经落地，细节以 README 和代码为准。实际与设计稿的差别：
+> - 不再在 galleries.yaml 里逐个列系列。`npm run import` 把打开的 AfterFrame 目录里**每个文件夹合集**都当作系列，按侧栏顺序、用合集名作标题；galleries.yaml 只放 skip、设备显示名和少量覆盖。
+> - 成员和原图路径来自 `manage_collections(browse)`；EXIF（含 GPS）由 publisher 直接读原图，不经 `get_asset`。
+> - 没有 `state/published.json` 和 `publish sync`；图片按内容寻址，R2 只增不删，所以不需要差异状态。
+> - 每组的设备在系列标题下标一次（由该组照片的 EXIF 汇总），单张只显示曝光参数。
+> - 系列页深浅色默认按照片亮度自动判断（`tone: auto`）。
+> - 第 6 节的 Squarespace 迁移脚本已经用完并删除。
+
 ## 1. 边界
 
 ```

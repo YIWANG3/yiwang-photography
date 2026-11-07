@@ -11,19 +11,26 @@ export const Link = z.object({
 
 export const GalleriesConfig = z.object({
   site: z.object({ title: z.string().min(1), links: z.array(Link).default([]) }),
+  // The AfterFrame app the import reads from. Every folder collection becomes a series unless skipped here.
+  afterframe: z.object({ port: z.number().int().default(41706), skip: z.array(z.string()).default([]) }).default({}),
+  // Display names for cameras and lenses as EXIF spells them ("Canon EOS R6m2" → "Canon EOS R6 Mark II").
+  // Two raw names may share a display name; they are then one piece of equipment.
+  equipment: z.record(z.string()).default({}),
+  // Per-series presentation. An entry with `collection` adjusts that AfterFrame collection (defaults: slug and
+  // title from its name, tone by brightness); an entry with `source` publishes a cache folder of its own.
   galleries: z.array(z.object({
-    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "slug must be kebab-case"),
-    title: z.string().min(1),
-    collection: z.string().optional(),   // AfterFrame collection name (exact), unused by the Squarespace source
-    source: z.string().optional(),       // cache folder when it differs from slug
+    collection: z.string().min(1).optional(), // AfterFrame collection name, exact
+    source: z.string().optional(),            // cache folder (on-site) when there is no collection
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "slug must be kebab-case").optional(),
+    title: z.string().min(1).optional(),
     year: z.number().int().optional(),
-    place: z.string().optional(),       // city/region label (unused by the site today)
-    tone: Tone.default("light"),
+    place: z.string().optional(),             // city/region, stands in for photos without an address
+    tone: z.enum(["light", "dark", "auto"]).default("auto"),
     order: z.enum(["captured_asc", "captured_desc", "manual"]).default("captured_asc"),
-    cover: z.string().optional(),        // file stem
+    cover: z.string().optional(),             // file stem
     description: z.string().optional(),
     hidden: z.boolean().optional(),
-  })),
+  }).refine((g) => g.collection || (g.source && g.slug && g.title), { message: "an entry needs a collection, or source + slug + title" })).default([]),
 });
 
 export const Exif = z.object({
@@ -62,6 +69,7 @@ export const Manifest = z.object({
   site: z.object({ title: z.string(), image_base: z.string(), exif_mock: z.boolean().default(false), geo_mock: z.boolean().default(false), links: z.array(Link).default([]) }),
   galleries: z.array(z.object({
     slug: z.string(), title: z.string(), year: z.number().nullable(), place: z.string().nullable(), tone: Tone,
+    gear: z.array(z.string()).default([]),   // the series' equipment, display names, cameras first
     description: z.string(), hidden: z.boolean(), cover: z.string(), count: z.number().int(),
     items: z.array(Item).min(1),
   })),

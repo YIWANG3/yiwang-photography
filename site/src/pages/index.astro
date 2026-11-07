@@ -1,13 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Pic from "../components/Pic.astro";
-import { galleries, itemById } from "../lib/data.js";
-// The year most of a series was taken, when its photographs carry dates (galleries.yaml's year wins).
-function yearOf(items) {
-  const n = new Map();
-  for (const it of items) { const y = (it.exif?.taken || it.taken || "").slice(0, 4); if (/^\d{4}$/.test(y)) n.set(y, (n.get(y) ?? 0) + 1); }
-  return [...n].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-}
+import { galleries, itemById, yearOf } from "../lib/data.js";
 ---
 <Base current="work">
   <div class="covers">

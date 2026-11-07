@@ -1,7 +1,7 @@
-# Which AfterFrame collections become galleries, and how the site presents them.
-# Order here is the order on the home page. Titles came from the old slugs; edit freely.
-# tone: dark makes the whole page dark for that series (a visitor's explicit theme choice still wins).
-# hidden: true keeps a gallery out of the index, home and Recent; its photos still appear on the map.
+# How the site presents the series. The series themselves are the folder collections of the AfterFrame catalog
+# that is open when `npm run import` runs: every collection is published, in the sidebar's order, titled by its
+# name, unless it is listed under afterframe.skip. Nothing here needs editing when a collection is added,
+# renamed or reordered in AfterFrame.
 site:
   title: yi.wang photography
   # External links, in display order. icon is one of: instagram, xiaohongshu, douyin, map, afterframe, link
@@ -16,90 +16,43 @@ site:
       url: https://www.douyin.com/user/MS4wLjABAAAA3UmSB3k8i75xRUVQDZALM63y1S9W5dQ6u-Z6CXv03Pg
       icon: douyin
 
+# The AfterFrame app to read. skip: collections that are working folders, not series.
+afterframe:
+  port: 41706
+  skip:
+    - Amusement Park (old)
+
+# Cameras and lenses as EXIF spells them → how the series header names them. Two raw names with the same
+# display name count as one (the Air 3S has two cameras). Unlisted names are shown as written.
+equipment:
+  Hasselblad CFV 100C/907X: Hasselblad 907X & CFV 100C
+  Canon EOS R6m2: Canon EOS R6 Mark II
+  Canon EOS R5m2: Canon EOS R5 Mark II
+  DJI FC9184: DJI Air 3S
+  DJI FC9113: DJI Air 3S
+  RF24-70mm F2.8 L IS USM: RF 24-70mm F2.8 L
+  RF100-500mm F4.5-7.1 L IS USM: RF 100-500mm F4.5-7.1 L
+  EF24-105mm f/4L IS USM: EF 24-105mm f/4L
+  EF24-105mm f/4L IS II USM: EF 24-105mm f/4L II
+  EF17-40mm f/4L USM: EF 17-40mm f/4L
+  EF70-200mm f/2.8L IS II USM: EF 70-200mm f/2.8L II
+  EF70-200mm f/2.8L IS II USM +2x III: EF 70-200mm f/2.8L II + 2x
+  TS-E17mm f/4L: TS-E 17mm f/4L
+
+# Per-series adjustments, matched by collection name. Everything is optional:
+#   slug (URL; defaults to the name in kebab-case), title, year, place, description, cover (file stem),
+#   tone: light | dark | auto (default: dark when the photographs are), order: captured_asc | captured_desc | manual,
+#   hidden: true keeps a series out of the index, home and Recent; its photos still appear on the map.
 galleries:
-  - slug: tokyo-night
-    place: Tokyo
-    collection: Tokyo Night
-    title: Tokyo Night
-    tone: dark
-  - slug: shinjuku
-    place: Tokyo
-    collection: Shinjuku
-    title: Shinjuku
-    tone: dark
-  - slug: aviation
-    place: San Francisco
-    collection: Aviation
-    title: Aviation
-    tone: light
-  - slug: sanfrancisco
-    place: San Francisco
-    collection: San Francisco
-    title: San Francisco
-    tone: dark
-  - slug: sanfrancisco-sunset
-    place: San Francisco
-    collection: San Francisco Sunset
-    title: San Francisco Sunset
-    tone: light
-  - slug: shanghai-i
-    place: Shanghai
-    collection: Shanghai I
-    title: Shanghai I
-    tone: dark
-  - slug: shanghai-ii
-    place: Shanghai
-    collection: Shanghai II
-    title: Shanghai II
-    tone: dark
-  - slug: pacifica
-    place: San Francisco
-    collection: Pacifica
-    title: Pacifica
-    tone: light
-  - slug: los-angeles-i
-    place: Los Angeles
-    collection: Los Angeles I
-    title: Los Angeles I
-    tone: dark
-  - slug: on-roppongi-hills
-    place: Tokyo
-    collection: On Roppongi Hills
-    title: On Roppongi Hills
-    tone: dark
-  - slug: lights
-    place: Tokyo
-    collection: Lights
-    title: Lights
-    tone: dark
-  - slug: newcastle
-    place: Newcastle
-    collection: Newcastle
-    title: Newcastle
-    tone: light
-  - slug: sunset
-    place: San Francisco
-    collection: Sunset
-    title: Sunset
-    tone: light
-  - slug: amusement-park
-    place: San Francisco
-    collection: Amusement Park
-    title: Amusement Park
-    tone: light
-  - slug: still-life-of-street
-    place: Tokyo
-    collection: Still Life of Street
-    title: Still Life of Street
-    tone: light
-  - slug: sanfrancisco-to
-    place: San Francisco
-    collection: San Francisco To
-    title: San Francisco To
-    tone: light
-  # on-site.photos archive: map-only. Its images that also appear in a gallery above are published as that
-  # gallery photo (matched by hash at import), with the real location and camera data attached.
-  - slug: on-site
+  # Slugs the old site used, kept so the links keep working.
+  - collection: San Francisco
+    slug: sanfrancisco
+  - collection: Los Angeles
+    slug: los-angeles-i
+  # on-site.photos archive: map-only. Its images that also appear in a series are published as that series'
+  # photo (matched by hash at import), with the real location and camera data attached.
+  - source: on-site
+    slug: on-site
     title: On Site
     description: Photographs placed by where they were taken.
     hidden: true
