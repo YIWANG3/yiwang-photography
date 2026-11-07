@@ -3,10 +3,10 @@ import Base from "../layouts/Base.astro";
 import Lightbox from "../components/Lightbox.astro";
 import { allGalleries, site, src, detailLine } from "../lib/data.js";
 
-// Every photo with a location, hidden galleries included (the on-site archive is map-only). The map script
-// reads this JSON; nothing is fetched. label = the place when known, else the series.
+// Every photo with a location, hidden galleries included. The map script reads this JSON; nothing is fetched.
+// label = the place when known, else the series. approx = placed at the series' location, not the camera's GPS.
 const points = allGalleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
-  id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes,
+  id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes, approx: it.geo.precision !== "exact" || undefined,
   thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, label: it.place || g.title, exif: detailLine(it),
   // Under a photo in the strip: its series, or for the map-only archive (no series to name) the month it was taken.
   caption: g.hidden ? when(it) : g.title,
@@ -30,7 +30,7 @@ const key = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY ?? "";
       <header><span class="map-panel-title" id="map-panel-title"></span><button type="button" class="ib" data-panel-close aria-label="Close">×</button></header>
       <div class="map-strip" id="map-strip"></div>
     </aside>
-    <div class="map-legend">{points.length} photographs{site.geo_mock && <span> · locations are placeholders in this prototype</span>}</div>
+    <div class="map-legend">{points.length} photographs{points.some((p) => p.approx) && <span> · dashed: placed at the series' location</span>}{site.geo_mock && <span> · locations are placeholders in this prototype</span>}</div>
   </div>
   <Lightbox />
   <script>

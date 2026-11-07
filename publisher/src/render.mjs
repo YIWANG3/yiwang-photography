@@ -94,6 +94,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     if (g.order === "best") items.sort((a, b) => (b._pick - a._pick) || byTime(a, b));
     else if (g.order !== "manual" && items.some((it) => it.taken)) items.sort(byTime);
     if (g.order === "captured_desc") items.reverse();
+    placeApproximately(items, g);
     const coverId = g.cover ? items.find((it, i) => sourceItems[i].stem === g.cover)?.id : undefined;
     const tone = g.tone === "auto" ? (median(items.map((it) => it._lum).filter((v) => v != null)) < DARK_BELOW ? "dark" : "light") : g.tone;
     for (const it of items) { delete it._lum; delete it._pick; }
@@ -104,7 +105,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     });
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
     if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken, series: g.slug })));
-    log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${tone}, ${items.filter((it) => it.geo && !it.mock).length} with real location${galleries.at(-1).gear.length ? ", " + galleries.at(-1).gear.join(" / ") : ""}`);
+    log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${tone}, ${items.filter((it) => it.geo?.precision === "exact" && !it.mock).length} located, ${items.filter((it) => it.geo && it.geo.precision !== "exact").length} placed${galleries.at(-1).gear.length ? ", " + galleries.at(-1).gear.join(" / ") : ""}`);
   }
 
   const manifest = Manifest.parse({
@@ -119,6 +120,28 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
   await writeFile(manifestPath, JSON.stringify(manifest, null, 1));
   const all = galleries.flatMap((g) => g.items);
   log(`manifest: ${galleries.length} galleries, ${all.length} photos (${all.filter((it) => it.geo && !it.mock).length} located, ${mocked} mocked); rendered ${rendered}, reused ${reused} files → ${path.relative(process.cwd(), manifestPath)}`);
+}
+
+// Photos without coordinates are placed at the series' location (galleries.yaml), or else at the centre of the
+// series' located photos, spread a little so they stay clickable at street zoom; the precision says they are
+// approximate and the map draws them so.
+const SPREAD = { landmark: 0.0004, locality: 0.004, admin1: 0.03 }; // degrees of latitude: ~45 m, ~450 m, ~3 km
+function placeApproximately(items, g) {
+  const missing = items.filter((it) => !it.geo);
+  if (!missing.length) return;
+  let at = g.location ? { ...g.location } : null;
+  if (!at) {
+    const real = items.filter((it) => it.geo && it.geo.precision === "exact" && !it.mock);
+    if (!real.length) return;
+    at = { lat: real.reduce((a, it) => a + it.geo.lat, 0) / real.length, lng: real.reduce((a, it) => a + it.geo.lng, 0) / real.length, precision: "locality" };
+  }
+  const r0 = SPREAD[at.precision] ?? SPREAD.locality;
+  for (const it of missing) {
+    const n = parseInt(it.id.slice(0, 8), 16) >>> 0;
+    const r = r0 * Math.sqrt((n & 0xfff) / 0xfff), a = ((n >>> 12) & 0xfff) / 0xfff * Math.PI * 2;
+    it.geo = { lat: +(at.lat + r * Math.sin(a)).toFixed(5), lng: +(at.lng + r * Math.cos(a) / Math.cos(at.lat * Math.PI / 180)).toFixed(5), precision: at.precision };
+    it.place ??= g.place ?? null;
+  }
 }
 
 function newest(dated) {

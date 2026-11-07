@@ -25,6 +25,9 @@ export const GalleriesConfig = z.object({
     title: z.string().min(1).optional(),
     year: z.number().int().optional(),
     place: z.string().optional(),             // city/region, stands in for photos without an address
+    // Where the series was made, for photos whose file carries no GPS: they go on the map here, marked approximate.
+    // Without it, a series whose other photos have GPS uses their centre.
+    location: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180), precision: z.enum(["landmark", "locality", "admin1"]).default("landmark") }).optional(),
     tone: z.enum(["light", "dark", "auto"]).default("auto"),
     // best: the photos flagged P in AfterFrame first, then the rest, each by capture time; captured_*: time only;
     // manual: as AfterFrame lists them
@@ -48,7 +51,8 @@ export const Exif = z.object({
 export const Geo = z.object({
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
-  precision: z.enum(["exact", "locality", "admin1", "country"]).default("exact"),
+  precision: z.enum(["exact", "landmark", "locality", "admin1", "country"]).default("exact"), // landmark = a building or park
+
 }).nullable();
 
 export const Item = z.object({

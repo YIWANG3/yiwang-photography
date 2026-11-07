@@ -41,8 +41,8 @@ async function init() {
   new MutationObserver(() => {
     map.setOptions({ styles: isDark() ? DARK : LIGHT, backgroundColor: isDark() ? "#101214" : "#dde3e6" });
     iconCache.clear();
-    for (const m of markers) { m.__iconKey = null; if (m.getMap()) wantIcon(m, m.__p.thumb, PIN); }
-    for (const m of clusterMarkers) { m.__iconKey = null; wantIcon(m, m.__thumb, CLUSTER, m.__count); }
+    for (const m of markers) { m.__iconKey = null; if (m.getMap()) wantIcon(m, m.__p.thumb, PIN, undefined, m.__p.approx); }
+    for (const m of clusterMarkers) { m.__iconKey = null; wantIcon(m, m.__thumb, CLUSTER, m.__count, m.__approx); }
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   // Thumbnails are drawn onto a canvas, so a CDN-hosted image must be fetched with CORS (the R2 bucket allows
@@ -75,7 +75,7 @@ async function init() {
     if (!im) return dotIcon(size);
     try { return drawThumb(im, size, count); } catch { return dotIcon(size); }
   }
-  function drawThumb(im, size, count) {
+  function drawThumb(im, size, count, approx) {
     const pad = count ? 8 : 0, W = size + pad; // room for the badge on clusters
     const c = document.createElement("canvas"); c.width = c.height = W * DPR;
     const x = c.getContext("2d"); x.scale(DPR, DPR);
@@ -86,6 +86,10 @@ async function init() {
     const s = Math.max(size / im.naturalWidth, size / im.naturalHeight), dw = im.naturalWidth * s, dh = im.naturalHeight * s;
     x.drawImage(im, size / 2 - dw / 2, size / 2 + pad - dh / 2, dw, dh); x.restore();
     x.lineWidth = 2; x.strokeStyle = ring(); x.beginPath(); x.arc(size / 2, size / 2 + pad, size / 2 - 3, 0, Math.PI * 2); x.stroke();
+    if (approx) { // placed at the series' location, not where the camera stood: a dashed ring says so
+      x.setLineDash([3, 3]); x.strokeStyle = isDark() ? "#9a9b9e" : "#6b6b66"; x.lineWidth = 1.5;
+      x.beginPath(); x.arc(size / 2, size / 2 + pad, size / 2 - 1, 0, Math.PI * 2); x.stroke(); x.setLineDash([]);
+    }
     if (count) {
       const [bg, fg] = badge(); const t = String(count);
       x.font = `500 11px Poppins, system-ui, sans-serif`; const tw = Math.max(10, x.measureText(t).width);
@@ -99,25 +103,25 @@ async function init() {
   // Icons are cached per (image, size, badge, theme). A marker whose image is already decoded gets its
   // thumbnail at once; the others start as a dot and swap as soon as the image arrives.
   const iconCache = new Map();
-  function cachedIcon(url, size, count) {
-    const k = `${url}|${size}|${count ?? 0}|${isDark()}`;
+  function cachedIcon(url, size, count, approx) {
+    const k = `${url}|${size}|${count ?? 0}|${approx ? 1 : 0}|${isDark()}`;
     let ic = iconCache.get(k);
     if (!ic) {
       const im = ready.get(url);
       if (!im) return null;
-      try { ic = drawThumb(im, size, count); } catch { ic = dotIcon(size); }
+      try { ic = drawThumb(im, size, count, approx); } catch { ic = dotIcon(size); }
       iconCache.set(k, ic);
     }
     return ic;
   }
-  function wantIcon(marker, url, size, count) {
-    const k = `${url}|${size}|${count ?? 0}|${isDark()}`;
+  function wantIcon(marker, url, size, count, approx) {
+    const k = `${url}|${size}|${count ?? 0}|${approx ? 1 : 0}|${isDark()}`;
     if (marker.__iconKey === k) return;
-    const hit = cachedIcon(url, size, count);
+    const hit = cachedIcon(url, size, count, approx);
     if (hit) { marker.__iconKey = k; marker.setIcon(hit); return; }
     loadThumb(url).then((im) => {
       if (!im || marker.__iconKey === k) return;
-      const ic = cachedIcon(url, size, count);
+      const ic = cachedIcon(url, size, count, approx);
       if (ic) { marker.__iconKey = k; marker.setIcon(ic); }
     });
   }
@@ -163,15 +167,15 @@ async function init() {
   }
 
   const clusterMarkers = new Set();
-  new MarkerClusterer({
+  const clusterer = new MarkerClusterer({
     map, markers,
     algorithm: new SuperClusterAlgorithm({ radius: 70, maxZoom: 16 }),
     renderer: {
       render({ count, position, markers: ms }) {
-        const thumb = ms[0].__p.thumb;
-        const m = new google.maps.Marker({ position, icon: cachedIcon(thumb, CLUSTER, count) ?? dotIcon(CLUSTER), zIndex: 1000 + count, optimized: true });
-        m.__thumb = thumb; m.__count = count;
-        if (cachedIcon(thumb, CLUSTER, count)) m.__iconKey = `${thumb}|${CLUSTER}|${count}|${isDark()}`; else wantIcon(m, thumb, CLUSTER, count);
+        const thumb = ms[0].__p.thumb, approx = ms.every((mk) => mk.__p.approx); // dashed only when nothing in it is exact
+        const m = new google.maps.Marker({ position, icon: cachedIcon(thumb, CLUSTER, count, approx) ?? dotIcon(CLUSTER), zIndex: 1000 + count, optimized: true });
+        m.__thumb = thumb; m.__count = count; m.__approx = approx;
+        if (cachedIcon(thumb, CLUSTER, count, approx)) m.__iconKey = `${thumb}|${CLUSTER}|${count}|${approx ? 1 : 0}|${isDark()}`; else wantIcon(m, thumb, CLUSTER, count, approx);
         clusterMarkers.add(m);
         m.addListener("map_changed", () => { if (!m.getMap()) clusterMarkers.delete(m); });
         return m;
@@ -188,14 +192,22 @@ async function init() {
   });
   // Single markers get their thumbnail once they are actually on the map (the clusterer takes them off while clustered).
   // Clusters are asked again too: a thumbnail that failed to load the first time gets another chance.
-  map.addListener("idle", () => {
-    for (const m of markers) if (m.getMap()) wantIcon(m, m.__p.thumb, PIN);
-    for (const m of clusterMarkers) if (m.getMap()) wantIcon(m, m.__thumb, CLUSTER, m.__count);
+  // Past the clusterer's maxZoom every marker is on the map; only the ones in view fetch their thumbnail.
+  // The clusterer itself (re)places markers on its own idle handler, so the pass runs again when it is done.
+  function refreshIcons() {
+    const b = map.getBounds();
+    const inView = (m) => m.getMap() && (!b || b.contains(m.getPosition()));
+    for (const m of markers) if (inView(m)) wantIcon(m, m.__p.thumb, PIN, undefined, m.__p.approx);
+    for (const m of clusterMarkers) if (inView(m)) wantIcon(m, m.__thumb, CLUSTER, m.__count, m.__approx);
     warm();
-  });
+  }
+  map.addListener("idle", refreshIcons);
+  google.maps.event.addListener(clusterer, "clusteringend", refreshIcons);
 
   function showStrip(ps, title) {
     panelTitle.textContent = title;
+    panelTitle.title = ps.every((p) => p.approx) ? "Approximate: placed at the series' location" : "";
+    panelTitle.dataset.approx = ps.every((p) => p.approx) ? "1" : "";
     strip.replaceChildren(...ps.map((p, i) => {
       const b = document.createElement("button");
       b.type = "button";

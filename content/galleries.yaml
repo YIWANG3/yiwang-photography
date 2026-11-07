@@ -41,19 +41,181 @@ equipment:
 
 # Per-series adjustments, matched by collection name. Everything is optional:
 #   slug (URL; defaults to the name in kebab-case), title, year, place, description, cover (file stem),
-#   tone: light | dark | auto (default: dark when the photographs are), order: captured_asc | captured_desc | manual,
-#   hidden: true keeps a series out of the index, home and Recent; its photos still appear on the map.
+#   tone: light | dark | auto (default: dark when the photographs are),
+#   order: best (P-flagged first, default) | captured_asc | captured_desc | manual,
+#   hidden: true keeps a series out of the index, home and Recent; its photos still appear on the map,
+#   location: { lat, lng, precision: landmark | locality | admin1 } — where photos without GPS go on the map,
+#     shown as approximate. A series with some located photos and no location uses their centre.
+# Most cameras here wrote no GPS, so nearly every series carries a location: the landmark when the series is
+# one place, the city when it roamed. The old-site slugs of San Francisco and Los Angeles are kept.
 galleries:
-  # Slugs the old site used, kept so the links keep working.
-  - collection: San Francisco
-    slug: sanfrancisco
+  - collection: Vintage Paris
+    place: Paris
+    location: { lat: 48.8566, lng: 2.3522, precision: locality }
+  - collection: Montmartre
+    place: Montmartre, Paris
+    location: { lat: 48.8867, lng: 2.3431, precision: landmark }
+  - collection: Paris Street
+    place: Paris
+    location: { lat: 48.8566, lng: 2.3522, precision: locality }
+  - collection: Twin Peaks Night
+    place: Twin Peaks, San Francisco
+    location: { lat: 37.7544, lng: -122.4477, precision: landmark }
+  - collection: San Francisco Daytime
+    place: San Francisco
+    location: { lat: 37.7749, lng: -122.4194, precision: locality }
+  - collection: Hawaii
+    place: Hawaii
+    location: { lat: 20.9, lng: -157.0, precision: admin1 }
+  - collection: Shinjuku
+    place: Shinjuku, Tokyo
+    location: { lat: 35.6938, lng: 139.7034, precision: landmark }
+  - collection: Tokyo from Skytree
+    place: Tokyo Skytree
+    location: { lat: 35.7101, lng: 139.8107, precision: landmark }
+  - collection: Osaka I
+    place: Osaka
+    location: { lat: 34.6937, lng: 135.5023, precision: locality }
+  - collection: Tokyo Blue Hour
+    place: Tokyo
+    location: { lat: 35.6762, lng: 139.6503, precision: locality }
+  - collection: San Gregorio
+    place: San Gregorio State Beach
+    location: { lat: 37.3225, lng: -122.4016, precision: landmark }
   - collection: Los Angeles
     slug: los-angeles-i
-  # on-site.photos archive: map-only. Its images that also appear in a series are published as that series'
-  # photo (matched by hash at import), with the real location and camera data attached.
-  - source: on-site
-    slug: on-site
-    title: On Site
-    description: Photographs placed by where they were taken.
-    hidden: true
-    order: captured_desc
+    place: Los Angeles
+    location: { lat: 34.0522, lng: -118.2437, precision: locality }
+  - collection: The Oculus
+    place: The Oculus, New York
+    location: { lat: 40.7115, lng: -74.0113, precision: landmark }
+  - collection: Lands End
+    place: Lands End, San Francisco
+    location: { lat: 37.7806, lng: -122.5115, precision: landmark }
+  - collection: San Diego
+    place: San Diego
+    location: { lat: 32.7157, lng: -117.1611, precision: locality }
+  - collection: Pacifica II
+    place: Pacifica, California
+    location: { lat: 37.6138, lng: -122.4869, precision: locality }
+  - collection: Seoul
+    place: Seoul
+    location: { lat: 37.5665, lng: 126.978, precision: locality }
+  - collection: Montparnasse Tower XPAN
+    place: Tour Montparnasse, Paris
+    location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+  - collection: Montparnasse Tower Soft
+    place: Tour Montparnasse, Paris
+    location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+  - collection: Montparnasse Tower
+    place: Tour Montparnasse, Paris
+    location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+  - collection: Versailles
+    place: Palace of Versailles
+    location: { lat: 48.8049, lng: 2.1204, precision: landmark }
+  - collection: The Louvre
+    place: The Louvre, Paris
+    location: { lat: 48.8606, lng: 2.3376, precision: landmark }
+  - collection: Matterhorn
+    place: Zermatt
+    location: { lat: 46.0207, lng: 7.7491, precision: locality }
+  - collection: Grindelwald
+    place: Grindelwald
+    location: { lat: 46.6244, lng: 8.0414, precision: locality }
+  - collection: Mong Kok
+    place: Mong Kok, Hong Kong
+    location: { lat: 22.3193, lng: 114.1694, precision: landmark }
+  - collection: Hong Kong Night
+    place: Hong Kong
+    location: { lat: 22.2793, lng: 114.1628, precision: locality }
+  - collection: Vienna
+    place: Vienna
+    location: { lat: 48.2082, lng: 16.3738, precision: locality }
+  - collection: Mt Shasta
+    place: Mount Shasta
+    location: { lat: 41.4092, lng: -122.1949, precision: landmark }
+  - collection: Santa Cruz
+    place: Santa Cruz, California
+    location: { lat: 36.9741, lng: -122.0308, precision: locality }
+  - collection: Carmel Beach
+    place: Carmel Beach
+    location: { lat: 36.553, lng: -121.929, precision: landmark }
+  - collection: Osaka II
+    place: Osaka
+    location: { lat: 34.6937, lng: 135.5023, precision: locality }
+  - collection: Crissy Field
+    place: Crissy Field, San Francisco
+    location: { lat: 37.8039, lng: -122.464, precision: landmark }
+  - collection: Big Sur
+    place: Big Sur
+    location: { lat: 36.2704, lng: -121.8081, precision: locality }
+  - collection: Point Reyes Animals
+    place: Point Reyes
+    location: { lat: 38.069, lng: -122.878, precision: locality }
+  - collection: Point Reyes Blue Hour
+    place: Point Reyes
+    location: { lat: 38.069, lng: -122.878, precision: locality }
+  - collection: Santa Cruz Rainbow
+    place: Santa Cruz, California
+    location: { lat: 36.9741, lng: -122.0308, precision: locality }
+  - collection: Highway 1
+    place: Highway 1, Big Sur coast
+    location: { lat: 35.9, lng: -121.45, precision: locality }
+  - collection: Morro Bay
+    place: Morro Rock
+    location: { lat: 35.3694, lng: -120.8674, precision: landmark }
+  - collection: TWA Hotel
+    place: TWA Hotel, JFK
+    location: { lat: 40.6454, lng: -73.7769, precision: landmark }
+  - collection: On Manhattan Bridge
+    place: Manhattan Bridge
+    location: { lat: 40.7075, lng: -73.9906, precision: landmark }
+  - collection: Times Square Hasselblad
+    place: Times Square
+    location: { lat: 40.758, lng: -73.9855, precision: landmark }
+  - collection: New York Street Daytime
+    place: Manhattan
+    location: { lat: 40.7549, lng: -73.984, precision: locality }
+  - collection: Times Square Luna Ultra
+    place: Times Square
+    location: { lat: 40.758, lng: -73.9855, precision: landmark }
+  - collection: Dumbo
+    place: Dumbo, Brooklyn
+    location: { lat: 40.7033, lng: -73.9894, precision: landmark }
+  - collection: New York Night from Midtown R5 II
+    place: Midtown Manhattan
+    location: { lat: 40.7549, lng: -73.984, precision: locality }
+  - collection: The Met
+    place: The Met, New York
+    location: { lat: 40.7794, lng: -73.9632, precision: landmark }
+  - collection: Times Square
+    place: Times Square
+    location: { lat: 40.758, lng: -73.9855, precision: landmark }
+  - collection: New York Cityscape Luna Ultra
+    place: Manhattan
+    location: { lat: 40.7549, lng: -73.984, precision: locality }
+  - collection: Yellow Mountain
+    place: Huangshan
+    location: { lat: 30.1312, lng: 118.1683, precision: landmark }
+  - collection: Aviation
+    place: San Francisco
+    location: { lat: 37.7749, lng: -122.4194, precision: locality }
+  - collection: San Francisco
+    slug: sanfrancisco
+    place: San Francisco
+    location: { lat: 37.7749, lng: -122.4194, precision: locality }
+  - collection: Shanghai I
+    place: Shanghai
+    location: { lat: 31.2304, lng: 121.4737, precision: locality }
+  - collection: Shanghai II
+    place: Shanghai
+    location: { lat: 31.2304, lng: 121.4737, precision: locality }
+  - collection: On Roppongi Hills
+    place: Roppongi Hills, Tokyo
+    location: { lat: 35.6605, lng: 139.7292, precision: landmark }
+  - collection: Lights
+    place: Tokyo
+    location: { lat: 35.6762, lng: 139.6503, precision: locality }
+  - collection: Still Life of Street
+    place: Tokyo
+    location: { lat: 35.6762, lng: 139.6503, precision: locality }
