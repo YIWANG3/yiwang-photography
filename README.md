@@ -16,8 +16,11 @@ npm run dev                  # http://127.0.0.1:4321
 `npm run import` talks to the running AfterFrame app over MCP (port 41706; `AFTERFRAME_MCP_PORT` or
 `afterframe.port` in galleries.yaml for a dev build). Every folder collection of the open catalog is a series,
 in the sidebar's order, titled by its name; the originals stay on disk and are read once each (content hash,
-size, perceptual hash, EXIF with GPS), so a second import only touches new photos. Publishing a new series =
-make a collection in AfterFrame, then `npm run import && npm run render && npm run deploy`.
+size, perceptual hash, EXIF with GPS), so a second import only touches new photos. Photos flagged **P** in
+AfterFrame open their series (the first one is the cover); the rest follow by capture time. Publishing a new
+series = make a collection in AfterFrame, then `npm run import && npm run render && npm run deploy`.
+`npm run sync-images -- --prune` (after a deploy) deletes images the current site no longer references from
+the bucket and the local render folder; `--dry-run` only counts them.
 
 ## Deploy
 

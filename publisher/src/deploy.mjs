@@ -1,10 +1,12 @@
 // deploy: rendered images → R2, built site → Cloudflare Pages.
 // Images are content-addressed (publisher/src/render.mjs), so the sync only ever adds objects and never
-// overwrites or deletes: an old deploy keeps working while a new one uploads, and rollbacks are free.
+// overwrites: an old deploy keeps working while a new one uploads. Only the files the current manifest
+// references are uploaded; `sync-images --prune`, run after a deploy, deletes everything else from the bucket
+// (and from the local render folder), which is how superseded photos leave the CDN.
 import { readdir, readFile, stat, rm } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import path from "node:path";
-import { S3Client, ListObjectsV2Command, PutObjectCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, PutObjectCommand, DeleteObjectsCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
 
 const UPLOAD_CONCURRENCY = 8;
 const IMMUTABLE = "public, max-age=31536000, immutable";
@@ -17,27 +19,53 @@ export function r2Client({ accountId, accessKeyId, secretAccessKey }) {
   });
 }
 
-// Upload every <id>/<w>.webp under `dir` that the bucket does not have yet. Returns counts.
-export async function syncImages({ dir, bucket, client, dryRun = false, log = console.log }) {
+// Upload every <id>/<w>.webp the manifest references that the bucket does not have yet. Returns counts.
+export async function syncImages({ dir, manifest, bucket, client, dryRun = false, prune = false, log = console.log }) {
   await client.send(new HeadBucketCommand({ Bucket: bucket }));
-  const local = await listLocal(dir);
+  const wanted = await listWanted(manifest);
+  const local = new Set(await listLocal(dir));
   const remote = await listRemote(client, bucket);
-  const missing = local.filter((k) => !remote.has(k));
-  log(`images: ${local.length} local, ${remote.size} in r2://${bucket}, ${missing.length} to upload`);
-  if (dryRun || missing.length === 0) return { local: local.length, remote: remote.size, uploaded: 0 };
+  const lost = [...wanted].filter((k) => !local.has(k));
+  if (lost.length) throw new Error(`${lost.length} images in the manifest are not in ${dir} (run render first): ${lost.slice(0, 3).join(", ")}`);
+  const missing = [...wanted].filter((k) => !remote.has(k));
+  log(`images: ${wanted.size} in the manifest, ${remote.size} in r2://${bucket}, ${missing.length} to upload`);
 
   let done = 0, bytes = 0;
-  await runPool(missing.map((key) => async () => {
-    const file = path.join(dir, key);
-    const body = await readFile(file);
-    await client.send(new PutObjectCommand({
-      Bucket: bucket, Key: key, Body: body,
-      ContentType: contentType(key), CacheControl: IMMUTABLE,
-    }));
-    done++; bytes += body.length;
-    if (done % 50 === 0 || done === missing.length) log(`  ${done}/${missing.length} uploaded (${(bytes / 1e6).toFixed(1)} MB)`);
-  }), UPLOAD_CONCURRENCY);
-  return { local: local.length, remote: remote.size, uploaded: done };
+  if (!dryRun && missing.length) {
+    await runPool(missing.map((key) => async () => {
+      const file = path.join(dir, key);
+      const body = await readFile(file);
+      await client.send(new PutObjectCommand({
+        Bucket: bucket, Key: key, Body: body,
+        ContentType: contentType(key), CacheControl: IMMUTABLE,
+      }));
+      done++; bytes += body.length;
+      if (done % 50 === 0 || done === missing.length) log(`  ${done}/${missing.length} uploaded (${(bytes / 1e6).toFixed(1)} MB)`);
+    }), UPLOAD_CONCURRENCY);
+  }
+
+  let pruned = 0;
+  if (prune) {
+    const stale = [...remote].filter((k) => !wanted.has(k));
+    const staleLocal = [...local].filter((k) => !wanted.has(k));
+    log(`prune: ${stale.length} objects in the bucket and ${staleLocal.length} local files are not in the manifest${dryRun ? " (dry run, nothing deleted)" : ""}`);
+    if (!dryRun) {
+      for (let i = 0; i < stale.length; i += 1000) {
+        const batch = stale.slice(i, i + 1000);
+        const res = await client.send(new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: batch.map((Key) => ({ Key })), Quiet: true } }));
+        if (res.Errors?.length) throw new Error(`prune: ${res.Errors.length} deletes failed, first: ${res.Errors[0].Key} ${res.Errors[0].Message}`);
+        pruned += batch.length;
+        log(`  ${pruned}/${stale.length} deleted`);
+      }
+      for (const k of staleLocal) await rm(path.join(dir, k), { force: true });
+      for (const id of await readdir(dir)) { // folders left empty by the deletes
+        const sub = path.join(dir, id);
+        if ((await stat(sub)).isDirectory() && (await readdir(sub)).length === 0) await rm(sub, { recursive: true });
+      }
+      if (staleLocal.length) log(`  ${staleLocal.length} local files removed from ${dir}`);
+    }
+  }
+  return { wanted: wanted.size, remote: remote.size, uploaded: done, pruned };
 }
 
 // Build the site with the production image base, then push dist/ to Pages with wrangler.
@@ -53,6 +81,14 @@ export async function buildSite({ root, imageBase, log = console.log }) {
 export async function deployPages({ root, project, branch = "main", log = console.log }) {
   log(`pages: deploying site/dist to project "${project}" (${branch})`);
   await run("npx", ["wrangler", "pages", "deploy", "site/dist", "--project-name", project, "--branch", branch, "--commit-dirty=true"], { cwd: root });
+}
+
+// Every <id>/<w>.webp the manifest references.
+async function listWanted(manifestPath) {
+  const m = JSON.parse(await readFile(manifestPath, "utf8"));
+  const keys = new Set();
+  for (const g of m.galleries) for (const it of g.items) for (const w of it.sizes) keys.add(`${it.id}/${w}.webp`);
+  return keys;
 }
 
 async function listLocal(dir) {

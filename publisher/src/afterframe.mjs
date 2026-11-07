@@ -37,6 +37,18 @@ export class AfterFrame {
     return out;
   }
 
+  // Asset ids in a collection that carry Lightroom's pick flag (P), in any order.
+  async picks(collectionId) {
+    const out = new Set();
+    for (let offset = 0; ; offset += 200) {
+      const page = await this.call("search_assets", { collection_id: collectionId, flag: "pick", limit: 200, offset });
+      const assets = page.assets ?? [];
+      for (const a of assets) out.add(a.asset_id);
+      if (assets.length < 200) break;
+    }
+    return out;
+  }
+
   async rpc(method, params, { init = false } = {}) {
     const id = this.nextId++;
     const res = await this.post({ jsonrpc: "2.0", id, method, params }, init);

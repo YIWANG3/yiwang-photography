@@ -84,14 +84,18 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
         taken: real?.taken ?? it.taken ?? null,
         mock: isMock,
         _lum: await luminance(path.join(dir, `${outputs[0]}.webp`)),
+        _pick: it.pick ? 1 : 0,
       };
     }), CONCURRENCY);
 
-    if (g.order !== "manual" && items.some((it) => it.taken)) items.sort((a, b) => (a.taken ?? "9").localeCompare(b.taken ?? "9"));
+    // Order: the photos flagged P in AfterFrame open the series (the first is the cover), then the rest, by time.
+    const byTime = (a, b) => (a.taken ?? "9").localeCompare(b.taken ?? "9");
+    if (g.order === "best") items.sort((a, b) => (b._pick - a._pick) || byTime(a, b));
+    else if (g.order !== "manual" && items.some((it) => it.taken)) items.sort(byTime);
     if (g.order === "captured_desc") items.reverse();
     const coverId = g.cover ? items.find((it, i) => sourceItems[i].stem === g.cover)?.id : undefined;
     const tone = g.tone === "auto" ? (median(items.map((it) => it._lum).filter((v) => v != null)) < DARK_BELOW ? "dark" : "light") : g.tone;
-    for (const it of items) delete it._lum;
+    for (const it of items) { delete it._lum; delete it._pick; }
     galleries.push({
       slug: g.slug, title: g.title, year: g.year ?? null, place: g.place ?? null, tone, description: g.description ?? "",
       gear: gearOf(items, config.equipment),
@@ -124,7 +128,7 @@ async function seriesList(cacheDir, config, log) {
   for (const g of imported) {
     const o = byCollection.get(g.collection) ?? {};
     byCollection.delete(g.collection);
-    out.push({ tone: "auto", order: "captured_asc", ...o, slug: o.slug ?? g.slug, title: o.title ?? g.collection, source: g.slug });
+    out.push({ tone: "auto", order: "best", ...o, slug: o.slug ?? g.slug, title: o.title ?? g.collection, source: g.slug });
   }
   for (const name of byCollection.keys()) log(`  galleries.yaml: collection "${name}" is not in the last AfterFrame import (ignored)`);
   for (const g of config.galleries) if (!g.collection) out.push(g);

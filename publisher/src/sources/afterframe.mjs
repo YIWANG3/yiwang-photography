@@ -38,6 +38,7 @@ export async function importAfterframe({ cacheDir, port, config, log = console.l
     if (slugs.has(slug)) throw new Error(`two collections map to the slug "${slug}" (${c.name}); give one a slug in galleries.yaml`);
     slugs.add(slug);
     const members = (await af.members(c.collection_id)).filter((a) => a.asset_type === "image");
+    const picks = await af.picks(c.collection_id);
     const items = new Array(members.length);
     const unreadable = [];
     await runPool(members.map((a, i) => async () => {
@@ -51,6 +52,7 @@ export async function importAfterframe({ cacheDir, port, config, log = console.l
         id: rec.id, path: file, file: path.basename(file), stem: a.stem ?? path.basename(file).replace(/\.[^.]+$/, ""), asset_id: a.asset_id,
         w: rec.w, h: rec.h, dhash: rec.dhash, alt: a.caption && !/\.(jpe?g|png)$/i.test(a.caption) ? a.caption : "",
         taken: rec.taken ?? a.capture_time ?? null, geo: rec.geo, exif: rec.exif,
+        pick: picks.has(a.asset_id), // flagged P in AfterFrame: opens the series (render), the first one is the cover
       };
     }), CONCURRENCY);
     const kept = items.filter(Boolean);

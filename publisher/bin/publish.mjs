@@ -3,7 +3,7 @@
 //   import               read the open AfterFrame catalog's collections (the series) and their originals' EXIF
 //   import-onsite        pull the on-site.photos posts + originals into .cache/originals/on-site (real GPS/EXIF)
 //   render               originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock: placeholders)
-//   sync-images          upload rendered images the R2 bucket does not have yet
+//   sync-images          upload the manifest's images the R2 bucket does not have yet (--prune: delete the rest)
 //   deploy               sync-images, build the site against the image CDN, push dist/ to Cloudflare Pages
 // Credentials and deploy targets come from the root .env (see .env.example); flags override.
 import path from "node:path";
@@ -53,7 +53,7 @@ try {
     const t = deployTarget();
     if (!flags["skip-images"]) {
       requireEnv(t.r2, ["accountId", "accessKeyId", "secretAccessKey"], "R2_");
-      await syncImages({ dir: paths.outDir, bucket: t.bucket, client: r2Client(t.r2), dryRun: Boolean(flags["dry-run"]) });
+      await syncImages({ dir: paths.outDir, manifest: paths.manifest, bucket: t.bucket, client: r2Client(t.r2), dryRun: Boolean(flags["dry-run"]), prune: cmd === "sync-images" && Boolean(flags.prune) });
     }
     if (cmd === "deploy") {
       if (!t.imageBase) throw new Error("IMAGE_BASE is not set (the public URL of the R2 bucket, e.g. https://img.yiwang.photography)");
@@ -61,7 +61,7 @@ try {
       if (!flags["skip-pages"] && !flags["dry-run"]) await deployPages({ root: ROOT, project: t.project, branch: t.branch });
     }
   } else {
-    console.error("usage: publish <import|import-onsite|render|sync-images|deploy> [--port=41706] [--server-env=PATH] [--image-base=/i] [--force] [--mock] [--dry-run] [--skip-images] [--skip-pages] [--branch=main]");
+    console.error("usage: publish <import|import-onsite|render|sync-images|deploy> [--port=41706] [--server-env=PATH] [--image-base=/i] [--force] [--mock] [--dry-run] [--prune] [--skip-images] [--skip-pages] [--branch=main]");
     process.exit(2);
   }
 } catch (err) {

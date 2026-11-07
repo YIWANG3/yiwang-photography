@@ -26,7 +26,9 @@ export const GalleriesConfig = z.object({
     year: z.number().int().optional(),
     place: z.string().optional(),             // city/region, stands in for photos without an address
     tone: z.enum(["light", "dark", "auto"]).default("auto"),
-    order: z.enum(["captured_asc", "captured_desc", "manual"]).default("captured_asc"),
+    // best: the photos flagged P in AfterFrame first, then the rest, each by capture time; captured_*: time only;
+    // manual: as AfterFrame lists them
+    order: z.enum(["best", "captured_asc", "captured_desc", "manual"]).default("best"),
     cover: z.string().optional(),             // file stem
     description: z.string().optional(),
     hidden: z.boolean().optional(),
