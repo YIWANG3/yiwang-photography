@@ -33,7 +33,9 @@ mainland-reachability check are in `docs/deploy.md`.
 
 `content/galleries.yaml` holds what the site adds on top: collections to skip, display names for cameras and
 lenses (the series header names the equipment once), and per-series overrides (slug, title, tone, cover,
-description). A series' page is dark when its photographs are, unless `tone` says otherwise. Photos exported
+description, and `zh: { title, place }` for the Chinese text). The site is bilingual at the same URLs: both
+texts are in every page and `<html data-lang>` (the switch in the sidebar, else the browser language) picks one;
+interface strings live in `site/src/i18n/ui.js` and the `L` component. A series' page is dark when its photographs are, unless `tone` says otherwise. Photos exported
 without EXIF show no data; the on-site.photos archive (334 photographs with real GPS and addresses) is map-only,
 and the ones that are also gallery photos are published once, as that gallery photo, with that data.
 `npm run render -- --mock` fills missing data with placeholders for layout work; the site then says so.

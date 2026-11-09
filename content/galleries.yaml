@@ -4,7 +4,7 @@
 # renamed or reordered in AfterFrame.
 site:
   title: yi.wang photography
-  series_order: newest_first   # or afterframe (the catalog's sidebar order)
+  series_order: newest_first # or afterframe (the catalog's sidebar order)
   # External links, in display order. icon is one of: instagram, xiaohongshu, douyin, map, afterframe, link
   links:
     - label: Instagram
@@ -44,6 +44,7 @@ equipment:
 
 # Per-series adjustments, matched by collection name. Everything is optional:
 #   slug (URL; defaults to the name in kebab-case), title, year, place, description, cover (file stem),
+#   zh: { title, place, description } — the same text for the Chinese pages (/zh/); missing fields fall back to English,
 #   tone: light | dark | auto (default: dark when the photographs are),
 #   order: best (P-flagged first, default) | captured_asc | captured_desc | manual,
 #   hidden: true keeps a series out of the index, home and Recent; its photos still appear on the map,
@@ -55,170 +56,266 @@ galleries:
   - collection: Vintage Paris
     place: Paris
     location: { lat: 48.8566, lng: 2.3522, precision: locality }
+    zh: { title: 复古巴黎, place: 巴黎 }
   - collection: Montmartre
     place: Montmartre, Paris
     location: { lat: 48.8867, lng: 2.3431, precision: landmark }
+    zh: { title: 蒙马特, place: 巴黎蒙马特 }
   - collection: Paris Street
     place: Paris
     location: { lat: 48.8566, lng: 2.3522, precision: locality }
+    zh: { title: 巴黎街头, place: 巴黎 }
   - collection: Twin Peaks Night
     place: Twin Peaks, San Francisco
     location: { lat: 37.7544, lng: -122.4477, precision: landmark }
+    zh: { title: 双子峰夜景, place: 旧金山双子峰 }
   - collection: San Francisco Daytime
     place: San Francisco
     location: { lat: 37.7749, lng: -122.4194, precision: locality }
+    zh: { title: 旧金山·白天, place: 旧金山 }
   - collection: Hawaii
     place: Hawaii
     location: { lat: 20.9, lng: -157.0, precision: admin1 }
+    zh: { title: 夏威夷, place: 夏威夷 }
   - collection: Shinjuku
     place: Shinjuku, Tokyo
     location: { lat: 35.6938, lng: 139.7034, precision: landmark }
+    zh: { title: 新宿, place: 东京新宿 }
   - collection: Tokyo from Skytree
     place: Tokyo Skytree
     location: { lat: 35.7101, lng: 139.8107, precision: landmark }
+    zh: { title: 晴空塔俯瞰东京, place: 东京晴空塔 }
   - collection: Osaka I
     place: Osaka
     location: { lat: 34.6937, lng: 135.5023, precision: locality }
+    zh: { title: 大阪 I, place: 大阪 }
   - collection: Tokyo Blue Hour
     place: Tokyo
     location: { lat: 35.6762, lng: 139.6503, precision: locality }
+    zh: { title: 东京蓝调时刻, place: 东京 }
   - collection: San Gregorio
     place: San Gregorio State Beach
     location: { lat: 37.3225, lng: -122.4016, precision: landmark }
+    zh: { title: 圣格雷戈里奥, place: 圣格雷戈里奥州立海滩 }
   - collection: Los Angeles
     slug: los-angeles-i
     place: Los Angeles
     location: { lat: 34.0522, lng: -118.2437, precision: locality }
+    zh: { title: 洛杉矶, place: 洛杉矶 }
   - collection: The Oculus
     place: The Oculus, New York
     location: { lat: 40.7115, lng: -74.0113, precision: landmark }
+    zh: { title: Oculus 车站, place: 纽约 Oculus }
   - collection: Lands End
     place: Lands End, San Francisco
     location: { lat: 37.7806, lng: -122.5115, precision: landmark }
+    zh: { title: 兰兹角, place: 旧金山兰兹角 }
   - collection: San Diego
     place: San Diego
     location: { lat: 32.7157, lng: -117.1611, precision: locality }
+    zh: { title: 圣地亚哥, place: 圣地亚哥 }
   - collection: Pacifica II
     place: Pacifica, California
     location: { lat: 37.6138, lng: -122.4869, precision: locality }
+    zh: { title: 帕西菲卡 II, place: 加州帕西菲卡 }
   - collection: Seoul
     place: Seoul
     location: { lat: 37.5665, lng: 126.978, precision: locality }
+    zh: { title: 首尔, place: 首尔 }
   - collection: Montparnasse Tower XPAN
     place: Tour Montparnasse, Paris
     location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+    zh: { title: 蒙帕纳斯大厦 XPAN, place: 巴黎蒙帕纳斯大厦 }
   - collection: Montparnasse Tower Soft
     place: Tour Montparnasse, Paris
     location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+    zh: { title: 蒙帕纳斯大厦·柔焦, place: 巴黎蒙帕纳斯大厦 }
   - collection: Montparnasse Tower
     place: Tour Montparnasse, Paris
     location: { lat: 48.8421, lng: 2.3219, precision: landmark }
+    zh: { title: 蒙帕纳斯大厦, place: 巴黎蒙帕纳斯大厦 }
   - collection: Versailles
     place: Palace of Versailles
     location: { lat: 48.8049, lng: 2.1204, precision: landmark }
+    zh: { title: 凡尔赛宫, place: 凡尔赛宫 }
   - collection: The Louvre
     place: The Louvre, Paris
     location: { lat: 48.8606, lng: 2.3376, precision: landmark }
+    zh: { title: 卢浮宫, place: 巴黎卢浮宫 }
   - collection: Matterhorn
     place: Zermatt
     location: { lat: 46.0207, lng: 7.7491, precision: locality }
+    zh: { title: 马特洪峰, place: 采尔马特 }
   - collection: Grindelwald
     place: Grindelwald
     location: { lat: 46.6244, lng: 8.0414, precision: locality }
+    zh: { title: 格林德瓦, place: 格林德瓦 }
   - collection: Mong Kok
     place: Mong Kok, Hong Kong
     location: { lat: 22.3193, lng: 114.1694, precision: landmark }
+    zh: { title: 旺角, place: 香港旺角 }
   - collection: Hong Kong Night
     place: Hong Kong
     location: { lat: 22.2793, lng: 114.1628, precision: locality }
+    zh: { title: 香港夜景, place: 香港 }
   - collection: Vienna
     place: Vienna
     location: { lat: 48.2082, lng: 16.3738, precision: locality }
+    zh: { title: 维也纳, place: 维也纳 }
   - collection: Mt Shasta
     place: Mount Shasta
     location: { lat: 41.4092, lng: -122.1949, precision: landmark }
+    zh: { title: 沙斯塔山, place: 沙斯塔山 }
   - collection: Santa Cruz
     place: Santa Cruz, California
     location: { lat: 36.9741, lng: -122.0308, precision: locality }
+    zh: { title: 圣克鲁兹, place: 加州圣克鲁兹 }
   - collection: Carmel Beach
     place: Carmel Beach
     location: { lat: 36.553, lng: -121.929, precision: landmark }
+    zh: { title: 卡梅尔海滩, place: 卡梅尔海滩 }
   - collection: Osaka II
     place: Osaka
     location: { lat: 34.6937, lng: 135.5023, precision: locality }
+    zh: { title: 大阪 II, place: 大阪 }
   - collection: Crissy Field
     place: Crissy Field, San Francisco
     location: { lat: 37.8039, lng: -122.464, precision: landmark }
+    zh: { title: 克里西菲尔德, place: 旧金山克里西菲尔德 }
   - collection: Big Sur
     place: Big Sur
     location: { lat: 36.2704, lng: -121.8081, precision: locality }
+    zh: { title: 大苏尔, place: 大苏尔 }
   - collection: Point Reyes Animals
     place: Point Reyes
     location: { lat: 38.069, lng: -122.878, precision: locality }
+    zh: { title: 雷斯岬的动物, place: 雷斯岬 }
   - collection: Point Reyes Blue Hour
     place: Point Reyes
     location: { lat: 38.069, lng: -122.878, precision: locality }
+    zh: { title: 雷斯岬蓝调时刻, place: 雷斯岬 }
   - collection: Santa Cruz Rainbow
     place: Santa Cruz, California
     location: { lat: 36.9741, lng: -122.0308, precision: locality }
+    zh: { title: 圣克鲁兹彩虹, place: 加州圣克鲁兹 }
   - collection: Highway 1
     place: Highway 1, Big Sur coast
     location: { lat: 35.9, lng: -121.45, precision: locality }
+    zh: { title: 一号公路, place: 大苏尔海岸一号公路 }
   - collection: Morro Bay
     place: Morro Rock
     location: { lat: 35.3694, lng: -120.8674, precision: landmark }
+    zh: { title: 莫罗湾, place: 莫罗岩 }
   - collection: TWA Hotel
     place: TWA Hotel, JFK
     location: { lat: 40.6454, lng: -73.7769, precision: landmark }
+    zh: { title: TWA 酒店, place: 肯尼迪机场 TWA 酒店 }
   - collection: On Manhattan Bridge
     place: Manhattan Bridge
     location: { lat: 40.7075, lng: -73.9906, precision: landmark }
+    zh: { title: 曼哈顿大桥上, place: 曼哈顿大桥 }
   - collection: Times Square Hasselblad
     place: Times Square
     location: { lat: 40.758, lng: -73.9855, precision: landmark }
+    zh: { title: 时代广场 Hasselblad, place: 时代广场 }
   - collection: New York Street Daytime
     place: Manhattan
     location: { lat: 40.7549, lng: -73.984, precision: locality }
+    zh: { title: 纽约街头·白天, place: 曼哈顿 }
   - collection: Times Square Luna Ultra
     place: Times Square
     location: { lat: 40.758, lng: -73.9855, precision: landmark }
+    zh: { title: 时代广场 Luna Ultra, place: 时代广场 }
   - collection: Dumbo
     place: Dumbo, Brooklyn
     location: { lat: 40.7033, lng: -73.9894, precision: landmark }
+    zh: { title: Dumbo, place: 布鲁克林 Dumbo }
   - collection: New York Night from Midtown R5 II
     place: Midtown Manhattan
     location: { lat: 40.7549, lng: -73.984, precision: locality }
+    zh: { title: 纽约中城夜景 R5 II, place: 曼哈顿中城 }
   - collection: The Met
     place: The Met, New York
     location: { lat: 40.7794, lng: -73.9632, precision: landmark }
+    zh: { title: 大都会博物馆, place: 纽约大都会博物馆 }
   - collection: Times Square
     place: Times Square
     location: { lat: 40.758, lng: -73.9855, precision: landmark }
+    zh: { title: 时代广场, place: 时代广场 }
   - collection: New York Cityscape Luna Ultra
     place: Manhattan
     location: { lat: 40.7549, lng: -73.984, precision: locality }
+    zh: { title: 纽约城市景观 Luna Ultra, place: 曼哈顿 }
   - collection: Yellow Mountain
     place: Huangshan
     location: { lat: 30.1312, lng: 118.1683, precision: landmark }
+    zh: { title: 黄山, place: 黄山 }
   - collection: Aviation
     place: San Francisco
     location: { lat: 37.7749, lng: -122.4194, precision: locality }
+    zh: { title: 航空, place: 旧金山 }
   - collection: San Francisco
     slug: sanfrancisco
     place: San Francisco
     location: { lat: 37.7749, lng: -122.4194, precision: locality }
+    zh: { title: 旧金山, place: 旧金山 }
   - collection: Shanghai I
     place: Shanghai
     location: { lat: 31.2304, lng: 121.4737, precision: locality }
+    zh: { title: 上海 I, place: 上海 }
   - collection: Shanghai II
     place: Shanghai
     location: { lat: 31.2304, lng: 121.4737, precision: locality }
+    zh: { title: 上海 II, place: 上海 }
   - collection: On Roppongi Hills
     place: Roppongi Hills, Tokyo
     location: { lat: 35.6605, lng: 139.7292, precision: landmark }
+    zh: { title: 六本木之丘上, place: 东京六本木之丘 }
   - collection: Lights
     place: Tokyo
     location: { lat: 35.6762, lng: 139.6503, precision: locality }
+    zh: { title: 灯火, place: 东京 }
   - collection: Still Life of Street
     place: Tokyo
     location: { lat: 35.6762, lng: 139.6503, precision: locality }
+    zh: { title: 街头静物, place: 东京 }
+  - collection: SF Fleet Week
+    zh: { title: 旧金山舰队周 }
+  - collection: Maui
+    zh: { title: 毛伊岛 }
+  - collection: Summit One
+    zh: { title: Summit One 观景台 }
+  - collection: Top of the Rock
+    zh: { title: 洛克菲勒观景台 }
+  - collection: Pigeon Point
+    zh: { title: 鸽点灯塔 }
+  - collection: San Francisco Drone II
+    zh: { title: 旧金山航拍 II }
+  - collection: Twin Peaks
+    zh: { title: 双子峰 }
+  - collection: Point Reyes Sunset
+    zh: { title: 雷斯岬日落 }
+  - collection: Mt Tam Forest
+    zh: { title: 塔马尔派斯山森林 }
+  - collection: Mt Tam Cloud
+    zh: { title: 塔马尔派斯山云海 }
+  - collection: San Francisco Drone I
+    zh: { title: 旧金山航拍 I }
+  - collection: Collinsville
+    zh: { title: 科林斯维尔 }
+  - collection: Highway 395 Fall Colors
+    zh: { title: 395 公路秋色 }
+  - collection: Seattle
+    zh: { title: 西雅图 }
+  - collection: Davenport
+    zh: { title: 达文波特 }
+  - collection: The Edge
+    zh: { title: The Edge 观景台 }
+  - collection: Amusement Park
+    zh: { title: 游乐园 }
+  - collection: Santa Cruz Pier
+    zh: { title: 圣克鲁兹码头 }
+  - collection: Chinatown
+    zh: { title: 唐人街 }
+  - collection: Pacifica I
+    zh: { title: 帕西菲卡 I }

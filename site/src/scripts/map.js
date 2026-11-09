@@ -5,6 +5,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 import { openLightbox } from "./lightbox.js";
 import { LIGHT, DARK } from "./mapStyles.js";
+import { t, pick } from "../i18n/ui.js";
 
 let instance = null;
 const PIN = 36, CLUSTER = 48, DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -140,8 +141,8 @@ async function init() {
   }
 
   const markers = points.map((p) => {
-    const m = new google.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon: dotIcon(PIN), title: p.label, optimized: true });
-    m.addListener("click", () => showStrip([p], p.label));
+    const m = new google.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon: dotIcon(PIN), title: pick(p, "label"), optimized: true });
+    m.addListener("click", () => showStrip([p], pick(p, "label")));
     m.__p = p;
     return m;
   });
@@ -184,7 +185,7 @@ async function init() {
     onClusterClick(_e, cluster, m) {
       if (m.getZoom() >= 16) {
         const ps = cluster.markers.map((mk) => mk.__p);
-        showStrip(ps, ps.every((p) => p.label === ps[0].label) ? ps[0].label : ps.every((p) => p.slug === ps[0].slug) ? ps[0].series : `${ps.length} photographs`);
+        showStrip(ps, ps.every((p) => p.label === ps[0].label) ? pick(ps[0], "label") : ps.every((p) => p.slug === ps[0].slug) ? pick(ps[0], "series") : t().photographs(ps.length));
       } else {
         m.fitBounds(cluster.bounds, 80);
       }
@@ -206,17 +207,17 @@ async function init() {
 
   function showStrip(ps, title) {
     panelTitle.textContent = title;
-    panelTitle.title = ps.every((p) => p.approx) ? "Approximate: placed at the series' location" : "";
-    panelTitle.dataset.approx = ps.every((p) => p.approx) ? "1" : "";
+    panelTitle.title = ps.every((p) => p.approx) ? t().approxTitle : "";
+    panelTitle.dataset.approx = ps.every((p) => p.approx) ? t().approx : "";
     strip.replaceChildren(...ps.map((p, i) => {
       const b = document.createElement("button");
       b.type = "button";
       // The header already says where; under each photo goes the series (or the month for map-only photos),
       // or the place when the header is the series.
-      const cap = p.caption === title ? p.label : p.caption || p.label;
+      const label = pick(p, "label"), cap = pick(p, "caption") === title ? label : pick(p, "caption") || label;
       b.style.setProperty("--r", (p.w / p.h).toFixed(4));
-      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${p.label}" loading="lazy" decoding="async"><span>${cap}</span>`;
-      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: q.exif, alt: q.label, title: q.label })), i));
+      b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${label}" loading="lazy" decoding="async"><span>${cap}</span>`;
+      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: pick(q, "exif"), alt: pick(q, "label"), title: pick(q, "label") })), i));
       return b;
     }));
     panel.hidden = false;

@@ -1,16 +1,18 @@
 ---
 import Base from "../layouts/Base.astro";
 import Pic from "../components/Pic.astro";
+import L from "../components/L.astro";
 import Lightbox from "../components/Lightbox.astro";
 import { recentIds, itemById, site } from "../lib/data.js";
+import { tr, placeOf } from "../i18n/ui.js";
 const items = recentIds.map(itemById).filter(Boolean);
 ---
-<Base title="Recent" current="recent">
-  <h1 class="page-title">Recent</h1>
+<Base title="Recent" titleZh="近期" current="recent">
+  <h1 class="page-title"><L en="Recent" zh="近期" /></h1>
   <div class="grid">
     {items.map((it, i) => (
       <div class="cell">
-        <Pic item={it} sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 25vw" alt={it.gallery.title} loading={i < 8 ? "eager" : "lazy"} lightbox index={i} title={it.gallery.title} href={`/${it.gallery.slug}/`} />
+        <Pic item={it} sizes="(max-width: 560px) 50vw, (max-width: 900px) 33vw, 25vw" alt={it.gallery.title} loading={i < 8 ? "eager" : "lazy"} lightbox index={i} title={it.gallery.title} titleZh={tr(it.gallery, "title", "zh")} href={`/${it.gallery.slug}/`} place={it.place} placeZh={placeOf(it, it.gallery, "zh")} />
       </div>
     ))}
   </div>

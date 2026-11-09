@@ -1,7 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 import Pic from "../components/Pic.astro";
+import L from "../components/L.astro";
 import { galleries, itemById, yearOf } from "../lib/data.js";
+import { tr } from "../i18n/ui.js";
 ---
 <Base current="work">
   <div class="covers">
@@ -12,7 +14,7 @@ import { galleries, itemById, yearOf } from "../lib/data.js";
           <div class="ph">
             <Pic item={cover} sizes="(max-width: 520px) 100vw, (max-width: 1180px) 50vw, 36vw" alt={g.title} loading={i < 3 ? "eager" : "lazy"} fetchpriority={i === 0 ? "high" : "auto"} />
           </div>
-          <div class="t"><span class="name">{g.title}</span><span class="n">{[g.count, g.year ?? yearOf(g.items)].filter(Boolean).join(" · ")}</span></div>
+          <div class="t"><span class="name"><L en={g.title} zh={tr(g, "title", "zh")} /></span><span class="n">{[g.count, g.year ?? yearOf(g.items)].filter(Boolean).join(" · ")}</span></div>
         </a>
       );
     })}

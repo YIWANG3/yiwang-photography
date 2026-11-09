@@ -1,21 +1,22 @@
 ---
 import Base from "../layouts/Base.astro";
 import Icon from "../components/Icon.astro";
+import L from "../components/L.astro";
 import { site } from "../lib/data.js";
 const links = site.links ?? [];
 ---
-<Base title="About" current="about">
-  <h1 class="page-title">About</h1>
+<Base title="About" titleZh="关于" current="about">
+  <h1 class="page-title"><L en="About" zh="关于" /></h1>
   <div class="prose">
     <header class="about-lead">
       <p class="about-slogan" lang="zh-Hans">去一些地方，拍一些照。</p>
       <p class="about-tagline" lang="en">Go places. Take photographs.</p>
     </header>
-    <div class="about-copy" lang="zh-Hans">
+    <div class="about-copy" lang="zh-Hans" data-l="zh">
       <p>我是 Yi Wang。我的摄影题材包括城市街道与建筑、海岸与山野、野生动物、航空，以及日常生活中的细节。在这些不同的题材中，我关注光线、色彩，以及画面里的形状与结构。</p>
       <p>这里是一本持续更新的个人摄影集，收录了我在不同年份、不同地方拍下的照片。作品按旅行或主题整理成系列，也可以通过近期作品和地图来浏览。</p>
     </div>
-    <div class="about-copy" lang="en">
+    <div class="about-copy" lang="en" data-l="en">
       <p>I’m Yi Wang. My photography includes city streets and architecture, coastal and mountain landscapes, wildlife, aviation, and everyday details. Across these subjects, I’m drawn to light, colour, and the shapes and structures within a scene.</p>
       <p>This website is my ongoing photo book, bringing together work from different places and years. Photographs are organised into series by trip or subject, with recent work and a map offering other ways to explore.</p>
     </div>
@@ -24,10 +25,10 @@ const links = site.links ?? [];
         {links.map((l) => <a href={l.url} target="_blank" rel="noopener me" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none"><Icon name={l.icon} size={14} />{l.label}</a>)}
       </p>
     )}
-    <h2>Projects / 项目</h2>
+    <h2><L en="Projects" zh="项目" /></h2>
     <h3 class="project-title"><a class="project-link" href="https://yiwang3.github.io/AfterFrame/" target="_blank" rel="noopener">AfterFrame</a></h3>
-    <p lang="zh-Hans">我开发并日常使用的本地照片工作软件，用来浏览、整理、编辑和挑选照片。这个网站的摄影系列也在其中选片。免费、开源。</p>
-    <p lang="en">A local-first photo workspace I build and use to browse, organise, edit, and select photographs. The series on this site are selected in AfterFrame. Free and open source.</p>
+    <p lang="zh-Hans" data-l="zh">我开发并日常使用的本地照片工作软件，用来浏览、整理、编辑和挑选照片。这个网站的摄影系列也在其中选片。免费、开源。</p>
+    <p lang="en" data-l="en">A local-first photo workspace I build and use to browse, organise, edit, and select photographs. The series on this site are selected in AfterFrame. Free and open source.</p>
     {site.exif_mock && <p class="m">Prototype note: the camera data shown under photographs is generated, not real. It will come from the catalogue once publishing is wired to AfterFrame.</p>}
   </div>
 </Base>

@@ -44,8 +44,8 @@ export function exposure(exif) {
 }
 // Everything the lightbox and the map show under a photo: place, exposure, month. The equipment is named
 // once per series (gear), not under every photograph.
-export function detailLine(item) {
-  return [item.place, ...exifLine(item.exif)].filter(Boolean).join(" · ");
+export function detailLine(item, place = item.place) {
+  return [place, ...exifLine(item.exif)].filter(Boolean).join(" · ");
 }
 
 export function exifLine(exif) {

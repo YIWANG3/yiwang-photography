@@ -2,21 +2,23 @@
 import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import Icon from "../components/Icon.astro";
+import L from "../components/L.astro";
 import { site, galleries } from "../lib/data.js";
+import { tr } from "../i18n/ui.js";
 
-interface Props { title?: string; description?: string; tone?: "light" | "dark"; current?: string }
-const { title, description = "Photographs by Yi Wang.", tone = "light", current } = Astro.props;
+interface Props { title?: string; titleZh?: string; description?: string; tone?: "light" | "dark"; current?: string }
+const { title, titleZh, description = "Photographs by Yi Wang.", tone = "light", current } = Astro.props;
 const fullTitle = title ? `${title} · ${site.title}` : site.title;
+const fullTitleZh = titleZh ? `${titleZh} · ${site.title}` : undefined;
 const isCur = (key: string) => (current === key ? "page" : undefined);
 const links = site.links ?? [];
-
 ---
 <!doctype html>
 <html lang="en" data-tone={tone}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>{fullTitle}</title>
+    <title data-zh={fullTitleZh}>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
@@ -26,41 +28,44 @@ const links = site.links ?? [];
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <ClientRouter />
     <script is:inline>
-      // Runs before paint: explicit choice > page tone > system. theme-toggle.js re-applies it after client navigations.
+      // Runs before paint. Theme: explicit choice > page tone > system. Language: explicit choice > the browser's.
+      // Both texts are in the page; <html data-lang> decides which one CSS shows. theme-toggle.js re-applies after swaps.
       (function () {
-        var pref = null;
-        try { pref = localStorage.getItem("theme"); } catch (e) {}
-        var tone = document.documentElement.dataset.tone;
+        var root = document.documentElement, pref = null, lang = null;
+        try { pref = localStorage.getItem("theme"); lang = localStorage.getItem("lang"); } catch (e) {}
+        var tone = root.dataset.tone;
         var sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        document.documentElement.dataset.theme = pref === "light" || pref === "dark" ? pref : (tone === "dark" ? "dark" : sys);
+        root.dataset.theme = pref === "light" || pref === "dark" ? pref : (tone === "dark" ? "dark" : sys);
+        if (lang !== "en" && lang !== "zh") lang = /^zh\b/i.test(navigator.language || "") ? "zh" : "en";
+        root.dataset.lang = lang; root.lang = lang === "zh" ? "zh-Hans" : "en";
       })();
     </script>
   </head>
   <body>
     <div class="shell">
-      <aside class="index" transition:persist="index" aria-label="Archive">
+      <aside class="index" transition:persist="index" aria-label="Archive" data-zh-aria-label="目录">
         <a class="wordmark" href="/">{site.title}</a>
 
-        <nav class="index-series" aria-label="Series">
-          <a class="index-label" href="/" aria-label="All series">Series</a>
+        <nav class="index-series" aria-label="Series" data-zh-aria-label="系列">
+          <a class="index-label" href="/" aria-label="All series" data-zh-aria-label="全部系列"><L en="Series" zh="系列" /></a>
           <div class="index-scroll">
             <ul class="series-list" data-series-list>
               {galleries.map((g) => (
-                <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name">{g.title}</span><span class="n">{g.count}</span></a></li>
+                <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name"><L en={g.title} zh={tr(g, "title", "zh")} /></span><span class="n">{g.count}</span></a></li>
               ))}
             </ul>
           </div>
         </nav>
 
         <div class="index-foot">
-          <nav class="pages" aria-label="Pages">
-            <a href="/" data-slug="work" aria-current={isCur("work")}>All series</a>
-            <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}>Recent</a>
-            <a href="/map/" data-slug="map" aria-current={isCur("map")}>Map</a>
-            <a href="/about/" data-slug="about" aria-current={isCur("about")}>About</a>
+          <nav class="pages" aria-label="Pages" data-zh-aria-label="页面">
+            <a href="/" data-slug="work" aria-current={isCur("work")}><L en="All series" zh="全部系列" /></a>
+            <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}><L en="Recent" zh="近期" /></a>
+            <a href="/map/" data-slug="map" aria-current={isCur("map")}><L en="Map" zh="地图" /></a>
+            <a href="/about/" data-slug="about" aria-current={isCur("about")}><L en="About" zh="关于" /></a>
           </nav>
           {links.length > 0 && (
-            <nav class="elsewhere" aria-label="Elsewhere">
+            <nav class="elsewhere" aria-label="Elsewhere" data-zh-aria-label="其他平台">
               {links.map((l) => (
                 <a href={l.url} target="_blank" rel="noopener me"><Icon name={l.icon} size={15} /><span>{l.label}</span></a>
               ))}
@@ -68,9 +73,12 @@ const links = site.links ?? [];
           )}
           <div class="row">
             <span class="copyright">© {new Date().getFullYear()} {site.title}</span>
-            <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" title="Light / dark">
-              <Icon name="sun" size={15} class="ic-sun" /><Icon name="moon" size={15} class="ic-moon" />
-            </button>
+            <span class="row-ctl">
+              <button type="button" class="lang-switch" data-lang-switch aria-label="切换到中文" data-zh-aria-label="Switch to English"><L en="中文" zh="English" /></button>
+              <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" data-zh-aria-label="切换深色 / 浅色" title="Light / dark" data-zh-title="深色 / 浅色">
+                <Icon name="sun" size={15} class="ic-sun" /><Icon name="moon" size={15} class="ic-moon" />
+              </button>
+            </span>
           </div>
         </div>
       </aside>
@@ -79,33 +87,33 @@ const links = site.links ?? [];
         <header class="topbar" transition:persist="topbar">
           <div class="row">
             <a class="wordmark" href="/">{site.title}</a>
-            <button type="button" class="menu-btn" data-side-open aria-label="Open menu" aria-controls="side"><Icon name="menu" size={22} /></button>
+            <button type="button" class="menu-btn" data-side-open aria-label="Open menu" data-zh-aria-label="打开菜单" aria-controls="side"><Icon name="menu" size={22} /></button>
           </div>
         </header>
         <div class="side" id="side" transition:persist="side" aria-hidden="true">
           <div class="side-backdrop" data-side-close></div>
-          <div class="side-panel" role="dialog" aria-modal="true" aria-label="Menu">
+          <div class="side-panel" role="dialog" aria-modal="true" aria-label="Menu" data-zh-aria-label="菜单">
             <div class="side-head">
               <a class="wordmark" href="/">{site.title}</a>
-              <button type="button" class="ib" data-side-close aria-label="Close menu"><Icon name="close" size={20} /></button>
+              <button type="button" class="ib" data-side-close aria-label="Close menu" data-zh-aria-label="关闭菜单"><Icon name="close" size={20} /></button>
             </div>
             <div class="side-scroll">
-              <nav aria-label="Series">
-                <a class="index-label" href="/" aria-label="All series">Series</a>
+              <nav aria-label="Series" data-zh-aria-label="系列">
+                <a class="index-label" href="/" aria-label="All series" data-zh-aria-label="全部系列"><L en="Series" zh="系列" /></a>
                 <ul class="series-list" data-series-list>
                   {galleries.map((g) => (
-                    <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name">{g.title}</span><span class="n">{g.count}</span></a></li>
+                    <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name"><L en={g.title} zh={tr(g, "title", "zh")} /></span><span class="n">{g.count}</span></a></li>
                   ))}
                 </ul>
               </nav>
-              <nav class="pages" aria-label="Pages">
-                <a href="/" data-slug="work" aria-current={isCur("work")}>All series</a>
-                <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}>Recent</a>
-                <a href="/map/" data-slug="map" aria-current={isCur("map")}>Map</a>
-                <a href="/about/" data-slug="about" aria-current={isCur("about")}>About</a>
+              <nav class="pages" aria-label="Pages" data-zh-aria-label="页面">
+                <a href="/" data-slug="work" aria-current={isCur("work")}><L en="All series" zh="全部系列" /></a>
+                <a href="/recent/" data-slug="recent" aria-current={isCur("recent")}><L en="Recent" zh="近期" /></a>
+                <a href="/map/" data-slug="map" aria-current={isCur("map")}><L en="Map" zh="地图" /></a>
+                <a href="/about/" data-slug="about" aria-current={isCur("about")}><L en="About" zh="关于" /></a>
               </nav>
               {links.length > 0 && (
-                <nav class="elsewhere" aria-label="Elsewhere">
+                <nav class="elsewhere" aria-label="Elsewhere" data-zh-aria-label="其他平台">
                   {links.map((l) => (
                     <a href={l.url} target="_blank" rel="noopener me"><Icon name={l.icon} size={16} /><span>{l.label}</span></a>
                   ))}
@@ -114,9 +122,12 @@ const links = site.links ?? [];
             </div>
             <div class="side-foot">
               <span class="copyright">© {new Date().getFullYear()} {site.title}</span>
-              <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" title="Light / dark">
-                <Icon name="sun" size={16} class="ic-sun" /><Icon name="moon" size={16} class="ic-moon" />
-              </button>
+              <span class="row-ctl">
+                <button type="button" class="lang-switch" data-lang-switch aria-label="切换到中文" data-zh-aria-label="Switch to English"><L en="中文" zh="English" /></button>
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between light and dark" data-zh-aria-label="切换深色 / 浅色" title="Light / dark" data-zh-title="深色 / 浅色">
+                  <Icon name="sun" size={16} class="ic-sun" /><Icon name="moon" size={16} class="ic-moon" />
+                </button>
+              </span>
             </div>
           </div>
         </div>

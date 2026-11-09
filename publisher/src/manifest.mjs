@@ -9,6 +9,9 @@ export const Link = z.object({
   icon: z.enum(["instagram", "xiaohongshu", "douyin", "map", "afterframe", "link"]).default("link"),
 });
 
+// Per-series text in Chinese (galleries.yaml `zh:`). Fields left out fall back to the English ones.
+const Localized = z.object({ title: z.string().min(1).optional(), place: z.string().optional(), description: z.string().optional() });
+
 export const GalleriesConfig = z.object({
   site: z.object({
     title: z.string().min(1),
@@ -43,6 +46,8 @@ export const GalleriesConfig = z.object({
     // manual: as AfterFrame lists them
     order: z.enum(["best", "captured_asc", "captured_desc", "manual"]).default("best"),
     cover: z.string().optional(),             // file stem
+    // The same in Chinese, for the /zh/ pages; anything missing falls back to the English field.
+    zh: Localized.optional(),
     description: z.string().optional(),
     hidden: z.boolean().optional(),
   }).refine((g) => g.collection || (g.source && g.slug && g.title), { message: "an entry needs a collection, or source + slug + title" })).default([]),
@@ -87,6 +92,7 @@ export const Manifest = z.object({
     slug: z.string(), title: z.string(), year: z.number().nullable(), place: z.string().nullable(), tone: Tone,
     gear: z.array(z.string()).default([]),   // one row per camera, paired with its actual lenses
     description: z.string(), hidden: z.boolean(), cover: z.string(), count: z.number().int(),
+    zh: Localized.default({}),                // Chinese title/place/description, when galleries.yaml has them
     items: z.array(Item).min(1),
   })),
   recent: z.array(z.string()),

@@ -11,8 +11,11 @@ interface Props {
   index?: number;
   title?: string;
   href?: string;
+  titleZh?: string;
+  place?: string | null;
+  placeZh?: string | null;
 }
-const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index, title, href } = Astro.props;
+const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index, title, titleZh, href, place = item.place, placeZh } = Astro.props;
 const fallback = pick(item, 1200);
 const data = lightbox ? {
   "data-lb-id": item.id,
@@ -20,8 +23,10 @@ const data = lightbox ? {
   "data-lb-w": item.w,
   "data-lb-h": item.h,
   "data-lb-index": index,
-  "data-lb-exif": detailLine(item),
+  "data-lb-exif": detailLine(item, place),
+  "data-lb-exif-zh": placeZh && placeZh !== place ? detailLine(item, placeZh) : undefined,
   "data-lb-title": title,
+  "data-lb-title-zh": titleZh && titleZh !== title ? titleZh : undefined,
   "data-lb-href": href,
 } : {};
 ---

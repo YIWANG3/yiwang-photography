@@ -1,5 +1,6 @@
 // Preview first; the full-resolution rung is requested only when the user zooms.
 import { fitDimensions, previewSize, zoomSize, clampPan } from "./lightbox-image.js";
+import { t, pick } from "../i18n/ui.js";
 
 let state = null, gesture = null, lastTap = null, lastTouchTime = 0;
 const points = new Map();
@@ -37,7 +38,7 @@ function paint() {
   root.toggleAttribute("data-zoomed", state.zoom > 1.01);
   root.dataset.zoom = state.zoom.toFixed(2);
   const button = root.querySelector("[data-lb-zoom]");
-  button?.setAttribute("aria-label", state.zoom > 1.01 ? "Reset zoom" : "Zoom in");
+  button?.setAttribute("aria-label", state.zoom > 1.01 ? t().lbResetZoom : t().lbZoomIn);
   button?.setAttribute("aria-pressed", String(state.zoom > 1.01));
   if (state.zoom > 1.01) loadImage(current(), zoomSize(current()));
 }
@@ -73,11 +74,11 @@ function show(i) {
   delete img.dataset.loadedSize;
   img.classList.add("is-loading"); img.src = imageUrl(it, it.sizes[0]);
   img.width = it.w; img.height = it.h;
-  img.alt = it.alt || `${it.title ?? state.title} ${state.cur + 1}`;
+  img.alt = it.alt || `${pick(it, "title") ?? state.title} ${state.cur + 1}`;
   // On cross-series pages (Recent) the series name links to its page.
-  const name = it.title ?? state.title, counter = ` · ${String(state.cur + 1).padStart(2, "0")} / ${String(state.items.length).padStart(2, "0")}`;
+  const name = pick(it, "title") ?? state.title, counter = ` · ${String(state.cur + 1).padStart(2, "0")} / ${String(state.items.length).padStart(2, "0")}`;
   title.replaceChildren(it.href ? Object.assign(document.createElement("a"), { href: it.href, textContent: name }) : name, counter);
-  exif.replaceChildren(...(it.exif || "").split(" · ").filter(Boolean).map((s) => Object.assign(document.createElement("span"), { textContent: s })));
+  exif.replaceChildren(...(pick(it, "exif") || "").split(" · ").filter(Boolean).map((s) => Object.assign(document.createElement("span"), { textContent: s })));
   layout(); loadImage(it, previewFor(it));
   // Adjacent images are previews, even while the current photograph is zoomed.
   for (const d of [1, -1]) { const n = state.items[(state.cur + d + state.items.length) % state.items.length]; const p = new Image(); p.src = imageUrl(n, previewFor(n)); }
@@ -101,7 +102,9 @@ export function closeLightbox() {
 }
 
 export function itemFromImg(el) {
-  return { el, id: el.dataset.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: el.dataset.lbSizes.split(",").map(Number), w: Number(el.dataset.lbW), h: Number(el.dataset.lbH), exif: el.dataset.lbExif || "", alt: el.alt, index: Number(el.dataset.lbIndex), title: el.dataset.lbTitle || undefined, href: el.dataset.lbHref || undefined };
+  // Both languages ride along; show() picks the page's current one, so a switch while the page is open counts.
+  const d = el.dataset;
+  return { el, id: d.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: d.lbSizes.split(",").map(Number), w: Number(d.lbW), h: Number(d.lbH), exif: d.lbExif || "", exif_zh: d.lbExifZh, alt: el.alt, index: Number(d.lbIndex), title: d.lbTitle || undefined, title_zh: d.lbTitleZh, href: d.lbHref || undefined };
 }
 
 document.addEventListener("keydown", (e) => {
@@ -171,7 +174,7 @@ window.addEventListener("resize", () => { if (state) { layout(); loadImage(curre
 
 function armFigures() {
   const imgs = [...document.querySelectorAll("img[data-lb-id]")]; if (!imgs.length) return;
-  const items = imgs.map(itemFromImg).sort((a, b) => a.index - b.index), title = document.querySelector(".series-head h1")?.textContent ?? "";
+  const items = imgs.map(itemFromImg).sort((a, b) => a.index - b.index), title = "";
   items.forEach((it, i) => {
     it.el.setAttribute("tabindex", "0"); it.el.setAttribute("role", "button");
     const open = () => openLightbox(items, i, { title, onClose: (cur) => { cur.el.scrollIntoView({ block: "center", behavior: "instant" }); cur.el.focus?.({ preventScroll: true }); } });

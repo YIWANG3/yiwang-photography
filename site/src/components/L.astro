@@ -1,0 +1,6 @@
+---
+// A piece of text in both languages; CSS shows the one <html data-lang> names. Same text in both: written once.
+interface Props { en: string; zh?: string | null }
+const { en, zh } = Astro.props;
+---
+{!zh || zh === en ? en : <><span data-l="en" lang="en">{en}</span><span data-l="zh" lang="zh-Hans">{zh}</span></>}

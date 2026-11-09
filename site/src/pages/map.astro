@@ -1,36 +1,46 @@
 ---
 import Base from "../layouts/Base.astro";
+import L from "../components/L.astro";
 import Lightbox from "../components/Lightbox.astro";
 import { allGalleries, site, src, detailLine } from "../lib/data.js";
+import { tr, placeOf } from "../i18n/ui.js";
 
 // Every photo with a location, hidden galleries included. The map script reads this JSON; nothing is fetched.
 // label = the place when known, else the series. approx = placed at the series' location, not the camera's GPS.
-const points = allGalleries.flatMap((g) => g.items.filter((it) => it.geo).map((it) => ({
-  id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes, approx: it.geo.precision !== "exact" || undefined,
-  thumb: src(it, it.sizes[0]), series: g.title, slug: g.slug, label: it.place || g.title, exif: detailLine(it),
-  // Under a photo in the strip: its series, or for the map-only archive (no series to name) the month it was taken.
-  caption: g.hidden ? when(it) : g.title,
-})));
-function when(it) {
+// The *_zh fields are the same text in Chinese; the script picks by the page's language.
+const points = allGalleries.flatMap((g) => {
+  const zhSeries = tr(g, "title", "zh");
+  return g.items.filter((it) => it.geo).map((it) => {
+    const zhPlace = placeOf(it, g, "zh");
+    return {
+      id: it.id, lat: it.geo.lat, lng: it.geo.lng, w: it.w, h: it.h, sizes: it.sizes, approx: it.geo.precision !== "exact" || undefined,
+      thumb: src(it, it.sizes[0]), series: g.title, series_zh: zhSeries, slug: g.slug,
+      label: it.place || g.title, label_zh: zhPlace || zhSeries, exif: detailLine(it), exif_zh: detailLine(it, zhPlace),
+      // Under a photo in the strip: its series, or for the map-only archive (no series to name) the month it was taken.
+      caption: g.hidden ? when(it, "en") : g.title, caption_zh: g.hidden ? when(it, "zh-CN") : zhSeries,
+    };
+  });
+});
+function when(it, locale) {
   const ym = it.exif?.taken || (it.taken || "").slice(0, 7);
   if (!/^\d{4}-\d{2}/.test(ym)) return "";
-  return new Date(`${ym}-15T00:00:00Z`).toLocaleDateString("en", { month: "short", year: "numeric", timeZone: "UTC" });
+  return new Date(`${ym}-15T00:00:00Z`).toLocaleDateString(locale, { month: locale === "en" ? "short" : "long", year: "numeric", timeZone: "UTC" });
 }
 const key = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY ?? "";
 ---
-<Base title="Map" current="map" description="Where the photographs were taken.">
+<Base title="Map" titleZh="地图" current="map" description="Where the photographs were taken.">
   <div class="map-page" data-points={JSON.stringify(points)} data-key={key} data-base={site.image_base}>
-    <div class="map-canvas" id="map" role="application" aria-label="Map of photographs"></div>
-    <div class="map-type" role="group" aria-label="Map type">
-      <button type="button" data-map-type="roadmap" aria-pressed="true">Map</button>
-      <button type="button" data-map-type="hybrid" aria-pressed="false">Satellite</button>
+    <div class="map-canvas" id="map" role="application" aria-label="Map of photographs" data-zh-aria-label="照片地图"></div>
+    <div class="map-type" role="group" aria-label="Map type" data-zh-aria-label="地图类型">
+      <button type="button" data-map-type="roadmap" aria-pressed="true"><L en="Map" zh="地图" /></button>
+      <button type="button" data-map-type="hybrid" aria-pressed="false"><L en="Satellite" zh="卫星" /></button>
     </div>
     {!key && <div class="map-notice"><p>Google Maps key missing. Put <code>PUBLIC_GOOGLE_MAPS_KEY=…</code> in <code>site/.env</code> and restart the dev server.</p></div>}
     <aside class="map-panel" id="map-panel" hidden>
-      <header><span class="map-panel-title" id="map-panel-title"></span><button type="button" class="ib" data-panel-close aria-label="Close">×</button></header>
+      <header><span class="map-panel-title" id="map-panel-title"></span><button type="button" class="ib" data-panel-close aria-label="Close" data-zh-aria-label="关闭">×</button></header>
       <div class="map-strip" id="map-strip"></div>
     </aside>
-    <div class="map-legend">{points.length} photographs{points.some((p) => p.approx) && <span> · dashed: placed at the series' location</span>}{site.geo_mock && <span> · locations are placeholders in this prototype</span>}</div>
+    <div class="map-legend"><L en={`${points.length} photographs`} zh={`${points.length} 张照片`} />{points.some((p) => p.approx) && <span> · <L en="dashed: placed at the series' location" zh="虚线：标在该系列的拍摄地" /></span>}{site.geo_mock && <span> · locations are placeholders in this prototype</span>}</div>
   </div>
   <Lightbox />
   <script>

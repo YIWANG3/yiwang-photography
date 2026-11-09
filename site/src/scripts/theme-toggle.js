@@ -4,11 +4,28 @@
 const root = document.documentElement;
 
 function apply() {
-  let pref = null;
-  try { pref = localStorage.getItem("theme"); } catch {}
+  let pref = null, lang = null;
+  try { pref = localStorage.getItem("theme"); lang = localStorage.getItem("lang"); } catch {}
   const tone = root.dataset.tone;
   const sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   root.dataset.theme = pref === "light" || pref === "dark" ? pref : tone === "dark" ? "dark" : sys;
+  setLang(lang === "zh" || lang === "en" ? lang : /^zh\b/i.test(navigator.language || "") ? "zh" : "en");
+}
+
+// Language: the visible text switches by CSS (<html data-lang>); labels, tooltips and the tab title are swapped here.
+// An element names its Chinese attribute as data-zh-<attr>; the English one is kept in data-en-<attr> the first time.
+function setLang(lang) {
+  const zh = lang === "zh";
+  root.dataset.lang = lang; root.lang = zh ? "zh-Hans" : "en";
+  for (const el of document.querySelectorAll("[data-zh-aria-label], [data-zh-title]")) {
+    for (const [attr, key] of [["aria-label", "AriaLabel"], ["title", "Title"]]) {
+      if (!(`zh${key}` in el.dataset)) continue;
+      if (!(`en${key}` in el.dataset)) el.dataset[`en${key}`] = el.getAttribute(attr) ?? "";
+      el.setAttribute(attr, el.dataset[zh ? `zh${key}` : `en${key}`]);
+    }
+  }
+  const title = document.querySelector("title");
+  if (title) { if (!("en" in title.dataset)) title.dataset.en = title.textContent; document.title = zh && title.dataset.zh ? title.dataset.zh : title.dataset.en; }
 }
 
 function markCurrent() {
@@ -47,6 +64,11 @@ function closeSide() {
 }
 
 document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-lang-switch]")) {
+    const next = root.dataset.lang === "zh" ? "en" : "zh";
+    try { localStorage.setItem("lang", next); } catch {}
+    setLang(next); return;
+  }
   if (e.target.closest("[data-side-open]")) return openSide();
   if (e.target.closest("[data-side-close]") || e.target.closest(".side a[href]")) closeSide();
   if (!e.target.closest("[data-theme-toggle]")) return;
@@ -59,5 +81,6 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSide(
 document.addEventListener("astro:before-swap", closeSide);
 document.addEventListener("astro:after-swap", () => { apply(); markCurrent(); });
 document.addEventListener("astro:page-load", watchImages);
+apply();
 markCurrent();
 watchImages();

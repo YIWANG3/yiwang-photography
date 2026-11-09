@@ -103,6 +103,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
       slug: g.slug, title: g.title, year: g.year ?? null, place: g.place ?? null, tone, description: g.description ?? "",
       gear: gearOf(items, config.equipment),
       hidden: g.hidden ?? false, cover: coverId ?? items[0].id, count: items.length, items,
+      zh: g.zh ?? {},
     });
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
     if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken, series: g.slug })));
