@@ -62,7 +62,7 @@ svg { flex: none; }
 .index-foot .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .index-foot .row .theme-toggle { flex: none; }
 .row-ctl { display: inline-flex; align-items: center; gap: 14px; flex: none; }
-.lang-switch { font-size: 11px; color: var(--muted); letter-spacing: .02em; transition: color .15s; cursor: pointer; }
+.lang-switch { display: block; width: max-content; text-align: left; margin-top: -6px; font-size: 12px; letter-spacing: .03em; color: var(--muted); transition: color .15s; cursor: pointer; }
 html[data-lang="zh"] [data-l="en"], html:not([data-lang="zh"]) [data-l="zh"] { display: none !important; }
 .lang-switch:hover { color: var(--fg); }
 .copyright { font-size: 10px; font-weight: 300; color: var(--muted); white-space: nowrap; }
@@ -112,7 +112,7 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
   .side .elsewhere { font-size: 15px; gap: 12px; padding-top: 18px; }
   .side-foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding-top: 14px; border-top: 1px solid var(--line); }
   .side-foot .copyright { font-size: 11px; }
-  .side-foot .lang-switch { font-size: 13px; }
+  .side .lang-switch { font-size: 15px; margin-top: -14px; }
   html.no-scroll { overflow: hidden; }
   main { padding-left: var(--gutter); padding-top: 20px; }
 }
