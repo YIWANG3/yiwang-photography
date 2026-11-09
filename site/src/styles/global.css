@@ -184,6 +184,8 @@ img[loading] { opacity: 1; }
 .lb img.is-loading { filter: blur(16px); transition: none; } /* the small rung while the preview decodes */
 .lb .bar { position: relative; z-index: 3; background: #000; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); font-size: 12px; font-weight: 300; font-variant-numeric: tabular-nums; }
 .lb .bar .t { color: #eee; font-weight: 400; white-space: nowrap; }
+.lb .bar .t a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255, 255, 255, .35); }
+.lb .bar .t a:hover { text-decoration-color: currentColor; }
 .lb .bar .exif { color: #8f8f8f; display: flex; gap: 0 14px; flex-wrap: wrap; justify-content: center; }
 .lb .bar .exif span { white-space: nowrap; }
 .lb .bar .ctl { display: flex; gap: 2px; }

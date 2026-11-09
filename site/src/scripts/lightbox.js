@@ -74,7 +74,9 @@ function show(i) {
   img.classList.add("is-loading"); img.src = imageUrl(it, it.sizes[0]);
   img.width = it.w; img.height = it.h;
   img.alt = it.alt || `${it.title ?? state.title} ${state.cur + 1}`;
-  title.textContent = `${it.title ?? state.title} · ${String(state.cur + 1).padStart(2, "0")} / ${String(state.items.length).padStart(2, "0")}`;
+  // On cross-series pages (Recent) the series name links to its page.
+  const name = it.title ?? state.title, counter = ` · ${String(state.cur + 1).padStart(2, "0")} / ${String(state.items.length).padStart(2, "0")}`;
+  title.replaceChildren(it.href ? Object.assign(document.createElement("a"), { href: it.href, textContent: name }) : name, counter);
   exif.replaceChildren(...(it.exif || "").split(" · ").filter(Boolean).map((s) => Object.assign(document.createElement("span"), { textContent: s })));
   layout(); loadImage(it, previewFor(it));
   // Adjacent images are previews, even while the current photograph is zoomed.
@@ -99,7 +101,7 @@ export function closeLightbox() {
 }
 
 export function itemFromImg(el) {
-  return { el, id: el.dataset.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: el.dataset.lbSizes.split(",").map(Number), w: Number(el.dataset.lbW), h: Number(el.dataset.lbH), exif: el.dataset.lbExif || "", alt: el.alt, index: Number(el.dataset.lbIndex), title: el.dataset.lbTitle || undefined };
+  return { el, id: el.dataset.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: el.dataset.lbSizes.split(",").map(Number), w: Number(el.dataset.lbW), h: Number(el.dataset.lbH), exif: el.dataset.lbExif || "", alt: el.alt, index: Number(el.dataset.lbIndex), title: el.dataset.lbTitle || undefined, href: el.dataset.lbHref || undefined };
 }
 
 document.addEventListener("keydown", (e) => {
