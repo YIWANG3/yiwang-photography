@@ -15,6 +15,7 @@ import YAML from "yaml";
 import { GalleriesConfig, Manifest } from "./manifest.mjs";
 import { readIndex, itemPath } from "./cache.mjs";
 import { readOnsiteOverrides } from "./sources/onsite.mjs";
+import { gearOf } from "./equipment.mjs";
 
 export const RENDER_VERSION = 1;
 const LADDER = [480, 1200, 2000, 3200, 6000];
@@ -96,7 +97,7 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     if (g.order === "captured_desc") items.reverse();
     placeApproximately(items, g);
     const coverId = g.cover ? items.find((it, i) => sourceItems[i].stem === g.cover)?.id : undefined;
-    const tone = g.tone === "auto" ? (median(items.map((it) => it._lum).filter((v) => v != null)) < DARK_BELOW ? "dark" : "light") : g.tone;
+    const tone = g.tone === "auto" ? ((median(items.map((it) => it._lum).filter((v) => v != null)) ?? 255) < DARK_BELOW ? "dark" : "light") : g.tone;
     for (const it of items) { delete it._lum; delete it._pick; }
     galleries.push({
       slug: g.slug, title: g.title, year: g.year ?? null, place: g.place ?? null, tone, description: g.description ?? "",
@@ -106,6 +107,13 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
     if (!g.hidden) dated.push(...items.filter((it) => it.taken && !it.mock).map((it) => ({ id: it.id, taken: it.taken, series: g.slug })));
     log(`  ${g.slug}: ${items.length} photos${g.hidden ? " (hidden)" : ""}, ${tone}, ${items.filter((it) => it.geo?.precision === "exact" && !it.mock).length} located, ${items.filter((it) => it.geo && it.geo.precision !== "exact").length} placed${galleries.at(-1).gear.length ? ", " + galleries.at(-1).gear.join(" / ") : ""}`);
+  }
+
+  if (config.site.series_order === "newest_first") {
+    const when = (g) => g.year ? `${g.year}-07` : median(g.items.map((it) => it.taken).filter(Boolean).sort()) ?? "";
+    const hidden = galleries.filter((g) => g.hidden), visible = galleries.filter((g) => !g.hidden);
+    visible.sort((a, b) => when(b).localeCompare(when(a)));
+    galleries.splice(0, galleries.length, ...visible, ...hidden);
   }
 
   const manifest = Manifest.parse({
@@ -173,18 +181,6 @@ async function seriesList(cacheDir, config, log) {
   return out;
 }
 
-// The series' equipment from its photographs' EXIF: cameras that took at least a tenth of the dated photos,
-// then lenses when the series used few enough to name (fixed drone and phone lenses are not named).
-function gearOf(items, names = {}) {
-  const pretty = (raw) => names[raw] ?? raw.replace(/@\d+$/, "").trim();
-  const count = (vals) => { const m = new Map(); for (const v of vals) if (v) m.set(v, (m.get(v) ?? 0) + 1); return [...m].sort((a, b) => b[1] - a[1]); };
-  const cams = count(items.map((it) => it.exif?.camera && pretty(it.exif.camera)));
-  const total = cams.reduce((n, [, c]) => n + c, 0);
-  const cameras = cams.filter(([, c], i) => i === 0 || c >= total * 0.1).map(([name]) => name);
-  const lenses = count(items.map((it) => it.exif?.lens && !/^\d+(\.\d+)? ?mm\b/i.test(it.exif.lens) && pretty(it.exif.lens))).map(([name]) => name);
-  return [...cameras, ...(lenses.length <= 3 ? lenses : [])];
-}
-
 async function luminance(file) {
   try {
     const { channels } = await sharp(file).stats();
@@ -192,7 +188,7 @@ async function luminance(file) {
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   } catch { return null; }
 }
-const median = (xs) => { if (!xs.length) return 255; const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
+const median = (xs) => { if (!xs.length) return undefined; const s = [...xs].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)); return s[Math.floor(s.length / 2)]; };
 
 // --mock placeholders (dev only): deterministic from the id so layouts can be judged before real data exists.
 const MOCK_KITS = [

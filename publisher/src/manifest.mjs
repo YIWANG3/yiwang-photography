@@ -10,9 +10,19 @@ export const Link = z.object({
 });
 
 export const GalleriesConfig = z.object({
-  site: z.object({ title: z.string().min(1), links: z.array(Link).default([]) }),
+  site: z.object({
+    title: z.string().min(1),
+    links: z.array(Link).default([]),
+    // newest_first: series by the date most of their photographs were taken, latest on top (a series without
+    // dates needs `year` or goes last); afterframe: the sidebar order of the catalog.
+    series_order: z.enum(["newest_first", "afterframe"]).default("newest_first"),
+  }),
   // The AfterFrame app the import reads from. Every folder collection becomes a series unless skipped here.
-  afterframe: z.object({ port: z.number().int().default(41706), skip: z.array(z.string()).default([]) }).default({}),
+  afterframe: z.object({
+    port: z.number().int().default(41706),
+    skip: z.array(z.string()).default([]),               // collection names that are not series
+    skip_pattern: z.string().default("^\\d{6} "),      // regex: working folders by naming convention ("261108 …")
+  }).default({}),
   // Display names for cameras and lenses as EXIF spells them ("Canon EOS R6m2" → "Canon EOS R6 Mark II").
   // Two raw names may share a display name; they are then one piece of equipment.
   equipment: z.record(z.string()).default({}),
@@ -75,7 +85,7 @@ export const Manifest = z.object({
   site: z.object({ title: z.string(), image_base: z.string(), exif_mock: z.boolean().default(false), geo_mock: z.boolean().default(false), links: z.array(Link).default([]) }),
   galleries: z.array(z.object({
     slug: z.string(), title: z.string(), year: z.number().nullable(), place: z.string().nullable(), tone: Tone,
-    gear: z.array(z.string()).default([]),   // the series' equipment, display names, cameras first
+    gear: z.array(z.string()).default([]),   // one row per camera, paired with its actual lenses
     description: z.string(), hidden: z.boolean(), cover: z.string(), count: z.number().int(),
     items: z.array(Item).min(1),
   })),

@@ -21,11 +21,12 @@ export async function importAfterframe({ cacheDir, port, config, log = console.l
   const af = new AfterFrame({ port });
   const info = await af.connect();
   const skip = new Set(config.afterframe?.skip ?? []);
+  const skipPattern = config.afterframe?.skip_pattern ? new RegExp(config.afterframe.skip_pattern) : null;
   const overrides = new Map(config.galleries.map((g) => [g.collection, g]));
-  const collections = (await af.collections())
-    .filter((c) => c.kind === "manual" && !skip.has(c.name))
-    .sort((a, b) => a.sort_order - b.sort_order);
-  log(`AfterFrame ${info.version}: ${collections.length} collections to publish`);
+  const all = (await af.collections()).filter((c) => c.kind === "manual").sort((a, b) => a.sort_order - b.sort_order);
+  const skipped = all.filter((c) => skip.has(c.name) || skipPattern?.test(c.name));
+  const collections = all.filter((c) => !skipped.includes(c));
+  log(`AfterFrame ${info.version}: ${collections.length} collections to publish${skipped.length ? `, ${skipped.length} skipped (${skipped.map((c) => c.name).join(", ")})` : ""}`);
 
   const files = new FileCache(path.join(cacheDir, "afterframe-files.json"));
   await files.load();
@@ -34,8 +35,12 @@ export async function importAfterframe({ cacheDir, port, config, log = console.l
   let read = 0, cached = 0;
   for (const c of collections) {
     const o = overrides.get(c.name);
-    const slug = o?.slug ?? slugify(c.name);
-    if (slugs.has(slug)) throw new Error(`two collections map to the slug "${slug}" (${c.name}); give one a slug in galleries.yaml`);
+    let slug = o?.slug ?? slugify(c.name);
+    if (slugs.has(slug)) { // two collections with the same name: the later one gets a numbered URL
+      let n = 2; while (slugs.has(`${slug}-${n}`)) n++;
+      log(`  "${c.name}" is a second collection of that name; published as /${slug}-${n}/ (give it a slug in galleries.yaml to choose)`);
+      slug = `${slug}-${n}`;
+    }
     slugs.add(slug);
     const members = (await af.members(c.collection_id)).filter((a) => a.asset_type === "image");
     const picks = await af.picks(c.collection_id);
@@ -51,7 +56,9 @@ export async function importAfterframe({ cacheDir, port, config, log = console.l
       items[i] = {
         id: rec.id, path: file, file: path.basename(file), stem: a.stem ?? path.basename(file).replace(/\.[^.]+$/, ""), asset_id: a.asset_id,
         w: rec.w, h: rec.h, dhash: rec.dhash, alt: a.caption && !/\.(jpe?g|png)$/i.test(a.caption) ? a.caption : "",
-        taken: rec.taken ?? a.capture_time ?? null, geo: rec.geo, exif: rec.exif,
+        // Only the file's own EXIF date: AfterFrame's capture_time falls back to the file's mtime, which for an
+        // EXIF-less export is the day it was copied.
+        taken: rec.taken, geo: rec.geo, exif: rec.exif,
         pick: picks.has(a.asset_id), // flagged P in AfterFrame: opens the series (render), the first one is the cover
       };
     }), CONCURRENCY);

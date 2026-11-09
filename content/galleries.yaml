@@ -4,6 +4,7 @@
 # renamed or reordered in AfterFrame.
 site:
   title: yi.wang photography
+  series_order: newest_first   # or afterframe (the catalog's sidebar order)
   # External links, in display order. icon is one of: instagram, xiaohongshu, douyin, map, afterframe, link
   links:
     - label: Instagram
@@ -16,9 +17,11 @@ site:
       url: https://www.douyin.com/user/MS4wLjABAAAA3UmSB3k8i75xRUVQDZALM63y1S9W5dQ6u-Z6CXv03Pg
       icon: douyin
 
-# The AfterFrame app to read. skip: collections that are working folders, not series.
+# The AfterFrame app to read. skip: collections that are working folders, not series; skip_pattern: the same by
+# naming convention — anything starting with a six-digit date ("261108 Twin Peaks｜…") is work in progress.
 afterframe:
   port: 41706
+  skip_pattern: "^\\d{6} "
   skip:
     - Amusement Park (old)
 

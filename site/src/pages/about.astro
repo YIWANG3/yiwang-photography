@@ -7,15 +7,37 @@ const links = site.links ?? [];
 <Base title="About" current="about">
   <h1 class="page-title">About</h1>
   <div class="prose">
-    <p>Yi Wang photographs cities at the hours when they stop pretending: late evenings in Tokyo and Shanghai, early light over San Francisco.</p>
-    <p>The photographs here are organised as series, one per trip or subject.</p>
+    <header class="about-lead">
+      <p class="about-slogan" lang="zh-Hans">去一些地方，拍一些照。</p>
+      <p class="about-tagline" lang="en">Go places. Take photographs.</p>
+    </header>
+    <div class="about-copy" lang="zh-Hans">
+      <p>我是 Yi Wang。我的摄影题材包括城市街道与建筑、海岸与山野、野生动物、航空，以及日常生活中的细节。在这些不同的题材中，我关注光线、色彩，以及画面里的形状与结构。</p>
+      <p>这里是一本持续更新的个人摄影集，收录了我在不同年份、不同地方拍下的照片。作品按旅行或主题整理成系列，也可以通过近期作品和地图来浏览。</p>
+    </div>
+    <div class="about-copy" lang="en">
+      <p>I’m Yi Wang. My photography includes city streets and architecture, coastal and mountain landscapes, wildlife, aviation, and everyday details. Across these subjects, I’m drawn to light, colour, and the shapes and structures within a scene.</p>
+      <p>This website is my ongoing photo book, bringing together work from different places and years. Photographs are organised into series by trip or subject, with recent work and a map offering other ways to explore.</p>
+    </div>
     {links.length > 0 && (
       <p class="m" style="display:flex;flex-wrap:wrap;gap:8px 20px">
         {links.map((l) => <a href={l.url} target="_blank" rel="noopener me" style="display:inline-flex;align-items:center;gap:7px;text-decoration:none"><Icon name={l.icon} size={14} />{l.label}</a>)}
       </p>
     )}
-    <h2>Projects</h2>
-    <p><a href="https://yiwang3.github.io/AfterFrame/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px"><Icon name="afterframe" size={14} />AfterFrame</a> — a local-first photo workspace for browsing, organising and editing large libraries, which Yi builds and uses; the series on this site are selected in it. Free and open source.</p>
+    <h2>Projects / 项目</h2>
+    <h3 class="project-title"><a class="project-link" href="https://yiwang3.github.io/AfterFrame/" target="_blank" rel="noopener">AfterFrame</a></h3>
+    <p lang="zh-Hans">我开发并日常使用的本地照片工作软件，用来浏览、整理、编辑和挑选照片。这个网站的摄影系列也在其中选片。免费、开源。</p>
+    <p lang="en">A local-first photo workspace I build and use to browse, organise, edit, and select photographs. The series on this site are selected in AfterFrame. Free and open source.</p>
     {site.exif_mock && <p class="m">Prototype note: the camera data shown under photographs is generated, not real. It will come from the catalogue once publishing is wired to AfterFrame.</p>}
   </div>
 </Base>
+
+<style>
+  .about-lead { display: grid; gap: 6px; margin-bottom: 8px; }
+  .about-slogan { font-size: clamp(24px, 3vw, 32px); line-height: 1.45; font-weight: 400; }
+  .about-tagline { color: var(--muted); font-size: 16px; }
+  .about-copy { display: grid; gap: 14px; line-height: 1.7; }
+  .about-copy[lang="zh-Hans"] { line-height: 1.9; }
+  .project-title { font-size: 20px; font-weight: 400; line-height: 1.4; }
+  .project-link { white-space: nowrap; }
+</style>

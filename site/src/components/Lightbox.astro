@@ -2,13 +2,16 @@
 import Icon from "./Icon.astro";
 ---
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="lb-stage" id="lb-stage">
   <button type="button" class="zone prev" data-lb-nav="-1" aria-label="Previous"><Icon name="left" size={28} /></button>
   <button type="button" class="zone next" data-lb-nav="1" aria-label="Next"><Icon name="right" size={28} /></button>
-  <img id="lb-img" alt="" />
+  <img id="lb-img" alt="" draggable="false" />
+  </div>
   <div class="bar">
     <span class="t" id="lb-title"></span>
     <span class="exif" id="lb-exif"></span>
     <span class="ctl"><button type="button" class="ib" data-lb-nav="-1" aria-label="Previous"><Icon name="arrowLeft" size={16} /></button><button type="button" class="ib" data-lb-nav="1" aria-label="Next"><Icon name="arrowRight" size={16} /></button></span>
   </div>
+  <button type="button" class="ib zoom" data-lb-zoom aria-label="Zoom in" aria-pressed="false"><Icon name="zoomIn" size={18} class="ic-zoom-in" /><Icon name="zoomOut" size={18} class="ic-zoom-out" /></button>
   <button type="button" class="ib close" data-lb-close aria-label="Close"><Icon name="close" size={18} /></button>
 </div>
