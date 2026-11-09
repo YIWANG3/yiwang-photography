@@ -159,7 +159,8 @@ img[loading] { opacity: 1; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1vw, 12px); }
 @media (max-width: 1180px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.grid a { display: block; aspect-ratio: 1; position: relative; }
+.grid a, .grid .cell { display: block; aspect-ratio: 1; position: relative; }
+.grid img[data-lb-id] { cursor: zoom-in; }
 .grid img { position: absolute; inset: 8%; width: 84%; height: 84%; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .14)); }
 .prose { max-width: var(--measure); display: grid; gap: 16px; font-size: 16px; font-weight: 400; }
 .prose .m { color: var(--muted); font-size: 13px; }

@@ -9,8 +9,9 @@ interface Props {
   class?: string;
   lightbox?: boolean;
   index?: number;
+  title?: string;
 }
-const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index } = Astro.props;
+const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index, title } = Astro.props;
 const fallback = pick(item, 1200);
 const data = lightbox ? {
   "data-lb-id": item.id,
@@ -19,6 +20,7 @@ const data = lightbox ? {
   "data-lb-h": item.h,
   "data-lb-index": index,
   "data-lb-exif": detailLine(item),
+  "data-lb-title": title,
 } : {};
 ---
 <img

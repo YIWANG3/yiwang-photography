@@ -99,7 +99,7 @@ export function closeLightbox() {
 }
 
 export function itemFromImg(el) {
-  return { el, id: el.dataset.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: el.dataset.lbSizes.split(",").map(Number), w: Number(el.dataset.lbW), h: Number(el.dataset.lbH), exif: el.dataset.lbExif || "", alt: el.alt, index: Number(el.dataset.lbIndex) };
+  return { el, id: el.dataset.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: el.dataset.lbSizes.split(",").map(Number), w: Number(el.dataset.lbW), h: Number(el.dataset.lbH), exif: el.dataset.lbExif || "", alt: el.alt, index: Number(el.dataset.lbIndex), title: el.dataset.lbTitle || undefined };
 }
 
 document.addEventListener("keydown", (e) => {
