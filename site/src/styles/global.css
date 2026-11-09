@@ -43,7 +43,7 @@ svg { flex: none; }
   mask-image: linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 14px), transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 14px), transparent); }
 .index-scroll::-webkit-scrollbar { display: none; }
 .wordmark { font-weight: 500; font-size: 22px; line-height: 1.25; letter-spacing: 0; max-width: 9em; display: inline-block; }
-.index-label { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 400; }
+.index-label { display: block; width: max-content; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 400; } /* a link to All series, deliberately without a hover style */
 
 .series-list { display: grid; gap: 1px; font-size: 15px; }
 .series-list a { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; color: var(--muted); padding: 5px 0; transition: color .15s; position: relative; }

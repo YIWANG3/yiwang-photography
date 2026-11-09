@@ -42,7 +42,7 @@ const links = site.links ?? [];
         <a class="wordmark" href="/">{site.title}</a>
 
         <nav class="index-series" aria-label="Series">
-          <div class="index-label">Series</div>
+          <a class="index-label" href="/" aria-label="All series">Series</a>
           <div class="index-scroll">
             <ul class="series-list" data-series-list>
               {galleries.map((g) => (
@@ -91,7 +91,7 @@ const links = site.links ?? [];
             </div>
             <div class="side-scroll">
               <nav aria-label="Series">
-                <div class="index-label">Series</div>
+                <a class="index-label" href="/" aria-label="All series">Series</a>
                 <ul class="series-list" data-series-list>
                   {galleries.map((g) => (
                     <li><a href={`/${g.slug}/`} data-slug={g.slug} aria-current={isCur(g.slug)}><span class="name">{g.title}</span><span class="n">{g.count}</span></a></li>
