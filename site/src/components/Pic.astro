@@ -4,6 +4,7 @@ interface Props {
   item: any;
   sizes: string;
   alt?: string;
+  altZh?: string;
   loading?: "lazy" | "eager";
   fetchpriority?: "high" | "auto";
   class?: string;
@@ -15,7 +16,7 @@ interface Props {
   place?: string | null;
   placeZh?: string | null;
 }
-const { item, sizes, alt = item.alt || "", loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index, title, titleZh, href, place = item.place, placeZh } = Astro.props;
+const { item, sizes, alt = item.alt || "", altZh, loading = "lazy", fetchpriority = "auto", class: cls, lightbox = false, index, title, titleZh, href, place = item.place, placeZh } = Astro.props;
 const fallback = pick(item, 1200);
 const data = lightbox ? {
   "data-lb-id": item.id,
@@ -37,6 +38,7 @@ const data = lightbox ? {
   width={item.w}
   height={item.h}
   alt={alt}
+  data-zh-alt={altZh && altZh !== alt ? altZh : undefined}
   loading={loading}
   fetchpriority={fetchpriority}
   decoding="async"

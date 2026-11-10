@@ -12,13 +12,13 @@ function apply() {
   setLang(lang === "zh" || lang === "en" ? lang : /^zh\b/i.test(navigator.language || "") ? "zh" : "en");
 }
 
-// Language: the visible text switches by CSS (<html data-lang>); labels, tooltips and the tab title are swapped here.
+// Language: the visible text switches by CSS (<html data-lang>); labels, tooltips, image descriptions and the tab title are swapped here.
 // An element names its Chinese attribute as data-zh-<attr>; the English one is kept in data-en-<attr> the first time.
 function setLang(lang) {
   const zh = lang === "zh";
   root.dataset.lang = lang; root.lang = zh ? "zh-Hans" : "en";
-  for (const el of document.querySelectorAll("[data-zh-aria-label], [data-zh-title]")) {
-    for (const [attr, key] of [["aria-label", "AriaLabel"], ["title", "Title"]]) {
+  for (const el of document.querySelectorAll("[data-zh-aria-label], [data-zh-title], [data-zh-alt]")) {
+    for (const [attr, key] of [["aria-label", "AriaLabel"], ["title", "Title"], ["alt", "Alt"]]) {
       if (!(`zh${key}` in el.dataset)) continue;
       if (!(`en${key}` in el.dataset)) el.dataset[`en${key}`] = el.getAttribute(attr) ?? "";
       el.setAttribute(attr, el.dataset[zh ? `zh${key}` : `en${key}`]);

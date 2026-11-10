@@ -18,6 +18,18 @@ export function src(item, w) {
 export function srcset(item) {
   return item.sizes.map((w) => `${src(item, w)} ${w}w`).join(", ");
 }
+// The cover as a JPEG for link previews (og:image), with its size; null when the series has none.
+export function shareImage(g) {
+  return g?.share ? { url: `${site.image_base}/${g.cover}/og.jpg`, ...g.share } : null;
+}
+// What a photograph is, in words, for readers who cannot see it and for image search: the series and where it
+// was taken, once ("Lands End II" in "Lands End, San Francisco" is just the place). A caption of its own wins.
+export function altText(item, g, { title = g.title, place = item.place ?? g.place } = {}) {
+  if (item.alt) return item.alt;
+  if (!place) return title;
+  const bare = title.replace(/\s+[IVX]+$/, "").toLowerCase();
+  return place.toLowerCase().includes(bare) ? place : `${title}, ${place}`;
+}
 export function largest(item) {
   return item.sizes[item.sizes.length - 1];
 }

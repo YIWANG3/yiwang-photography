@@ -217,7 +217,7 @@ async function init() {
       const label = pick(p, "label"), cap = pick(p, "caption") === title ? label : pick(p, "caption") || label;
       b.style.setProperty("--r", (p.w / p.h).toFixed(4));
       b.innerHTML = `<img src="${p.thumb}" width="${p.w}" height="${p.h}" alt="${label}" loading="lazy" decoding="async"><span>${cap}</span>`;
-      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: pick(q, "exif"), alt: pick(q, "label"), title: pick(q, "label") })), i));
+      b.addEventListener("click", () => openLightbox(ps.map((q) => ({ id: q.id, base, sizes: q.sizes, w: q.w, h: q.h, exif: pick(q, "exif"), alt: pick(q, "label"), title: pick(q, "label"), page: q.page })), i));
       return b;
     }));
     panel.hidden = false;

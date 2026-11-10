@@ -2,7 +2,7 @@
 // publish: the command-line entry for everything that turns curated photos into the site's inputs.
 //   import               read the open AfterFrame catalog's collections (the series) and their originals' EXIF
 //   import-onsite        pull the on-site.photos posts + originals into .cache/originals/on-site (real GPS/EXIF)
-//   render               originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock: placeholders)
+//   render               originals → site/public/i/<id>/<w>.webp (+ og.jpg for covers) + site/src/data/manifest.json (--mock: placeholders)
 //   sync-images          upload the manifest's images the R2 bucket does not have yet (--prune: delete the rest)
 //   deploy               sync-images, build the site against the image CDN, push dist/ to Cloudflare Pages
 // Credentials and deploy targets come from the root .env (see .env.example); flags override.

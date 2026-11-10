@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import Pic from "../components/Pic.astro";
 import L from "../components/L.astro";
 import Lightbox from "../components/Lightbox.astro";
-import { allGalleries, galleries, exposure, yearOf } from "../lib/data.js";
+import { allGalleries, galleries, exposure, yearOf, shareImage, altText } from "../lib/data.js";
 import { tr, placeOf } from "../i18n/ui.js";
 
 export function getStaticPaths() {
@@ -28,9 +28,12 @@ const caption = (it: any) => [exposure(it.exif)].filter(Boolean);
 const zhTitle = tr(g, "title", "zh");
 const description = g.description, zhDescription = tr(g, "description", "zh");
 const year = g.year ?? yearOf(g.items);
-const pic = (it: any) => ({ item: it, lightbox: true, index: indexOf(it), title: g.title, titleZh: zhTitle, place: it.place, placeZh: placeOf(it, g, "zh") });
+const pic = (it: any) => {
+  const placeZh = placeOf(it, g, "zh");
+  return { item: it, lightbox: true, index: indexOf(it), title: g.title, titleZh: zhTitle, place: it.place, placeZh, alt: altText(it, g), altZh: altText(it, g, { title: zhTitle, place: placeZh ?? tr(g, "place", "zh") }) };
+};
 ---
-<Base title={g.title} titleZh={zhTitle} tone={g.tone} current={g.slug} description={description || `${g.title}, a series of ${g.count} photographs by Yi Wang.`}>
+<Base title={g.title} titleZh={zhTitle} tone={g.tone} current={g.slug} image={shareImage(g)} description={description || `${g.title}, a series of ${g.count} photographs by Yi Wang.`}>
   <header class="series-head">
     <h1><L en={g.title} zh={zhTitle} /></h1>
     <p class="meta"><L en={`Series of ${g.count}`} zh={`共 ${g.count} 张`} />{year ? ` · ${year}` : ""}</p>

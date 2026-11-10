@@ -9,7 +9,7 @@ npm run deploy
 
 It runs three steps (`publisher/src/deploy.mjs`):
 
-1. **sync-images** – uploads every `site/public/i/<id>/<w>.webp` the bucket does not have yet.
+1. **sync-images** – uploads every `site/public/i/<id>/<w>.webp` the bucket does not have yet, and each series cover's `<id>/og.jpg` (the JPEG that link previews show).
    Images are content-addressed, so nothing is ever overwritten or deleted; old pages keep working
    during an upload and a rollback is just an older Pages deployment.
 2. **build** – `astro build` with `PUBLIC_IMAGE_BASE=$IMAGE_BASE`, so every `<img>` points at the CDN.

@@ -3,11 +3,14 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import Icon from "../components/Icon.astro";
 import L from "../components/L.astro";
-import { site, galleries } from "../lib/data.js";
+import { site, galleries, shareImage } from "../lib/data.js";
 import { tr } from "../i18n/ui.js";
 
-interface Props { title?: string; titleZh?: string; description?: string; tone?: "light" | "dark"; current?: string }
-const { title, titleZh, description = "Photographs by Yi Wang.", tone = "light", current } = Astro.props;
+interface Props { title?: string; titleZh?: string; description?: string; tone?: "light" | "dark"; current?: string; image?: { url: string; w: number; h: number } | null }
+// image: what a pasted link shows. A series gives its cover; every other page borrows the newest series' cover.
+const { title, titleZh, description = "Photographs by Yi Wang.", tone = "light", current, image = shareImage(galleries[0]) } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = image ? new URL(image.url, Astro.site).href : null;
 const fullTitle = title ? `${title} · ${site.title}` : site.title;
 const fullTitleZh = titleZh ? `${titleZh} · ${site.title}` : undefined;
 const isCur = (key: string) => (current === key ? "page" : undefined);
@@ -20,6 +23,16 @@ const links = site.links ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title data-zh={fullTitleZh}>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    {imageUrl && <meta property="og:image:width" content={String(image.w)} />}
+    {imageUrl && <meta property="og:image:height" content={String(image.h)} />}
+    <meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0f1011" media="(prefers-color-scheme: dark)" />

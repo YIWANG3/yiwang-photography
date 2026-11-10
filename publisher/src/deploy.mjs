@@ -19,7 +19,7 @@ export function r2Client({ accountId, accessKeyId, secretAccessKey }) {
   });
 }
 
-// Upload every <id>/<w>.webp the manifest references that the bucket does not have yet. Returns counts.
+// Upload every image the manifest references (<id>/<w>.webp, and a cover's <id>/og.jpg) that the bucket does not have yet. Returns counts.
 export async function syncImages({ dir, manifest, bucket, client, dryRun = false, prune = false, log = console.log }) {
   await client.send(new HeadBucketCommand({ Bucket: bucket }));
   const wanted = await listWanted(manifest);
@@ -83,11 +83,14 @@ export async function deployPages({ root, project, branch = "main", log = consol
   await run("npx", ["wrangler", "pages", "deploy", "site/dist", "--project-name", project, "--branch", branch, "--commit-dirty=true"], { cwd: root });
 }
 
-// Every <id>/<w>.webp the manifest references.
+// Every <id>/<w>.webp the manifest references, plus the link-preview JPEG of each series' cover.
 async function listWanted(manifestPath) {
   const m = JSON.parse(await readFile(manifestPath, "utf8"));
   const keys = new Set();
-  for (const g of m.galleries) for (const it of g.items) for (const w of it.sizes) keys.add(`${it.id}/${w}.webp`);
+  for (const g of m.galleries) {
+    for (const it of g.items) for (const w of it.sizes) keys.add(`${it.id}/${w}.webp`);
+    if (g.share) keys.add(`${g.cover}/og.jpg`);
+  }
   return keys;
 }
 
@@ -96,7 +99,7 @@ async function listLocal(dir) {
   for (const id of await readdir(dir)) {
     const sub = path.join(dir, id);
     if (!(await stat(sub)).isDirectory()) continue;
-    for (const f of await readdir(sub)) if (f.endsWith(".webp")) keys.push(`${id}/${f}`);
+    for (const f of await readdir(sub)) if (f.endsWith(".webp") || f === "og.jpg") keys.push(`${id}/${f}`);
   }
   return keys.sort();
 }
@@ -113,7 +116,7 @@ async function listRemote(client, bucket) {
 }
 
 function contentType(key) {
-  return key.endsWith(".webp") ? "image/webp" : key.endsWith(".json") ? "application/json" : "application/octet-stream";
+  return key.endsWith(".webp") ? "image/webp" : key.endsWith(".jpg") ? "image/jpeg" : key.endsWith(".json") ? "application/json" : "application/octet-stream";
 }
 
 function run(cmd, args, opts) {

@@ -92,6 +92,7 @@ export const Manifest = z.object({
     slug: z.string(), title: z.string(), year: z.number().nullable(), place: z.string().nullable(), tone: Tone,
     gear: z.array(z.string()).default([]),   // one row per camera, paired with its actual lenses
     description: z.string(), hidden: z.boolean(), cover: z.string(), count: z.number().int(),
+    share: z.object({ w: z.number().int(), h: z.number().int() }).nullable().default(null), // <cover>/og.jpg, the link-preview JPEG
     zh: Localized.default({}),                // Chinese title/place/description, when galleries.yaml has them
     items: z.array(Item).min(1),
   })),

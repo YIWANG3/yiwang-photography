@@ -21,6 +21,7 @@ export const RENDER_VERSION = 1;
 const LADDER = [480, 1200, 2000, 3200, 6000];
 const CONCURRENCY = 4;
 const DARK_BELOW = 80;
+const SHARE_EDGE = 1200; // long edge of a cover's link-preview JPEG
 const RECENT = 36, RECENT_PER_SERIES = 3; // Recent = the newest dated photos, no series taking more than its share // median mean-luminance (0–255) under which a series is presented on a dark page
 
 export async function render({ cacheDir, galleries: galleriesPath, outDir, manifest: manifestPath, imageBase, force, mock = false, log = console.log }) {
@@ -99,10 +100,11 @@ export async function render({ cacheDir, galleries: galleriesPath, outDir, manif
     const coverId = g.cover ? items.find((it, i) => sourceItems[i].stem === g.cover)?.id : undefined;
     const tone = g.tone === "auto" ? ((median(items.map((it) => it._lum).filter((v) => v != null)) ?? 255) < DARK_BELOW ? "dark" : "light") : g.tone;
     for (const it of items) { delete it._lum; delete it._pick; }
+    const cover = items.find((it) => it.id === coverId) ?? items[0];
     galleries.push({
       slug: g.slug, title: g.title, year: g.year ?? null, place: g.place ?? null, tone, description: g.description ?? "",
       gear: gearOf(items, config.equipment),
-      hidden: g.hidden ?? false, cover: coverId ?? items[0].id, count: items.length, items,
+      hidden: g.hidden ?? false, cover: cover.id, share: g.hidden ? null : await shareImage(outDir, cover, force), count: items.length, items,
       zh: g.zh ?? {},
     });
     if (!g.hidden) recent.push(...items.slice(0, 3).map((it) => it.id));
@@ -180,6 +182,19 @@ async function seriesList(cacheDir, config, log) {
   for (const name of byCollection.keys()) log(`  galleries.yaml: collection "${name}" is not in the last AfterFrame import (ignored)`);
   for (const g of config.galleries) if (!g.collection) out.push(g);
   return out;
+}
+
+// What a link to the series shows when it is pasted into a chat or a post (og:image): the cover as a JPEG, since
+// not every app that draws link previews reads WebP. Cut from the rendered rung, not the original; it lives next
+// to the cover's other sizes as <id>/og.jpg and is uploaded with them.
+async function shareImage(outDir, item, force) {
+  const out = path.join(outDir, item.id, "og.jpg");
+  if (force || !existsSync(out) || (await stat(out)).size === 0) {
+    const from = path.join(outDir, item.id, `${item.sizes.find((s) => s >= SHARE_EDGE) ?? item.sizes.at(-1)}.webp`);
+    await sharp(from).resize({ width: SHARE_EDGE, height: SHARE_EDGE, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 84, mozjpeg: true }).toFile(out);
+  }
+  const { width, height } = await sharp(out).metadata();
+  return { w: width, h: height };
 }
 
 async function luminance(file) {

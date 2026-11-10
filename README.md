@@ -9,7 +9,7 @@ AfterFrame stays read-only: it is where photos are selected; everything about pu
 npm install
 npm run import               # AfterFrame must be open: its folder collections → .cache/originals/<slug>/index.json
 npm run import:onsite        # one-time: the on-site.photos archive (real GPS, address, EXIF) → .cache/originals/on-site
-npm run render               # originals → site/public/i/<id>/<w>.webp + site/src/data/manifest.json (--mock for placeholders)
+npm run render               # originals → site/public/i/<id>/<w>.webp (+ og.jpg per cover, for link previews) + site/src/data/manifest.json (--mock for placeholders)
 npm run dev                  # http://127.0.0.1:4321
 ```
 

@@ -2,6 +2,7 @@
 import { fitDimensions, previewSize, zoomSize, clampPan } from "./lightbox-image.js";
 import { t, pick } from "../i18n/ui.js";
 
+const PHOTO_HASH = /^#[0-9a-f]{12}$/;
 let state = null, gesture = null, lastTap = null, lastTouchTime = 0;
 const points = new Map();
 const els = () => ({ root: document.getElementById("lb"), stage: document.getElementById("lb-stage"), img: document.getElementById("lb-img"), title: document.getElementById("lb-title"), exif: document.getElementById("lb-exif") });
@@ -74,11 +75,14 @@ function show(i) {
   delete img.dataset.loadedSize;
   img.classList.add("is-loading"); img.src = imageUrl(it, it.sizes[0]);
   img.width = it.w; img.height = it.h;
-  img.alt = it.alt || `${pick(it, "title") ?? state.title} ${state.cur + 1}`;
+  img.alt = it.el?.alt || it.alt || `${pick(it, "title") ?? state.title} ${state.cur + 1}`; // the figure's own, in the page's current language
   // On cross-series pages (Recent) the series name links to its page.
   const name = pick(it, "title") ?? state.title, counter = ` · ${String(state.cur + 1).padStart(2, "0")} / ${String(state.items.length).padStart(2, "0")}`;
   title.replaceChildren(it.href ? Object.assign(document.createElement("a"), { href: it.href, textContent: name }) : name, counter);
   exif.replaceChildren(...(pick(it, "exif") || "").split(" · ").filter(Boolean).map((s) => Object.assign(document.createElement("span"), { textContent: s })));
+  // The address bar names the photograph while it is open, so the link can be copied or shared: its series page
+  // plus #<id>. Replaced, never pushed: paging adds no history, and Back still leaves the page.
+  if (it.page || it.id) history.replaceState(history.state, "", `${it.page ?? location.pathname}#${it.id}`);
   layout(); loadImage(it, previewFor(it));
   // Adjacent images are previews, even while the current photograph is zoomed.
   for (const d of [1, -1]) { const n = state.items[(state.cur + d + state.items.length) % state.items.length]; const p = new Image(); p.src = imageUrl(n, previewFor(n)); }
@@ -87,14 +91,18 @@ function show(i) {
 export function openLightbox(items, index = 0, { title = "", onClose } = {}) {
   const { root } = els();
   if (!root || !items.length) return;
-  state = { items, cur: -1, title, onClose };
+  // Where the address goes back to on close: this page, without a photograph's hash.
+  state = { items, cur: -1, title, onClose, url: location.pathname + location.search + (PHOTO_HASH.test(location.hash) ? "" : location.hash) };
   root.setAttribute("data-open", ""); document.body.setAttribute("data-lb-open", "");
   show(index); root.querySelector(".close")?.focus({ preventScroll: true });
 }
 
-export function closeLightbox() {
+// restoreUrl is false when the page is already being left by Back/Forward: the address then belongs to the page
+// being arrived at.
+export function closeLightbox({ restoreUrl = true } = {}) {
   const { root } = els(); if (!root || !state) return;
   const view = state, it = current();
+  if (restoreUrl) history.replaceState(history.state, "", view.url);
   state = null; gesture = lastTap = null; points.clear();
   root.removeAttribute("data-open"); root.removeAttribute("data-zoomed"); root.removeAttribute("data-dragging");
   document.body.removeAttribute("data-lb-open");
@@ -104,7 +112,7 @@ export function closeLightbox() {
 export function itemFromImg(el) {
   // Both languages ride along; show() picks the page's current one, so a switch while the page is open counts.
   const d = el.dataset;
-  return { el, id: d.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: d.lbSizes.split(",").map(Number), w: Number(d.lbW), h: Number(d.lbH), exif: d.lbExif || "", exif_zh: d.lbExifZh, alt: el.alt, index: Number(d.lbIndex), title: d.lbTitle || undefined, title_zh: d.lbTitleZh, href: d.lbHref || undefined };
+  return { el, page: d.lbHref || undefined, id: d.lbId, base: el.getAttribute("src").split("/").slice(0, -2).join("/"), sizes: d.lbSizes.split(",").map(Number), w: Number(d.lbW), h: Number(d.lbH), exif: d.lbExif || "", exif_zh: d.lbExifZh, alt: el.alt, index: Number(d.lbIndex), title: d.lbTitle || undefined, title_zh: d.lbTitleZh, href: d.lbHref || undefined };
 }
 
 document.addEventListener("keydown", (e) => {
@@ -181,6 +189,21 @@ function armFigures() {
     it.el.addEventListener("click", open);
     it.el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
   });
+  openFromHash();
+}
+// A link to one photograph (/series/#<id>) opens it: on arrival, and when the address is changed on the page itself.
+function openFromHash() {
+  if (!state && PHOTO_HASH.test(location.hash)) document.querySelector(`img[data-lb-id="${location.hash.slice(1)}"]`)?.click();
 }
 document.addEventListener("astro:page-load", armFigures);
-document.addEventListener("astro:before-swap", () => { if (state) closeLightbox(); });
+// The address changed under an open viewer (Back over a typed link, or an edited hash): follow it.
+window.addEventListener("hashchange", () => {
+  if (!state) return openFromHash();
+  if (!PHOTO_HASH.test(location.hash)) return closeLightbox({ restoreUrl: false });
+  const i = state.items.findIndex((it) => it.id === location.hash.slice(1));
+  if (i >= 0 && i !== state.cur) show(i);
+});
+// Leaving the page closes the viewer. A link puts this page's own address back first, so the history entry being
+// left is the page and not the photograph; Back/Forward has already moved on.
+document.addEventListener("astro:before-preparation", (e) => { if (state) closeLightbox({ restoreUrl: e.navigationType !== "traverse" }); });
+document.addEventListener("astro:before-swap", () => { if (state) closeLightbox({ restoreUrl: false }); });
