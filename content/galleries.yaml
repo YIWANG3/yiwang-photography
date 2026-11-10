@@ -41,6 +41,8 @@ equipment:
   EF70-200mm f/2.8L IS II USM: EF 70-200mm f/2.8L II
   EF70-200mm f/2.8L IS II USM +2x III: EF 70-200mm f/2.8L II + 2x
   TS-E17mm f/4L: TS-E 17mm f/4L
+  OPPO Find X9 Ultra tele camera 70mm f/2.2: Tele 70mm f/2.2
+  OPPO Find X9 Ultra tele camera 230mm f/3.5: Tele 230mm f/3.5
 
 # Per-series adjustments, matched by collection name. Everything is optional:
 #   slug (URL; defaults to the name in kebab-case), title, year, place, description, cover (file stem),
@@ -106,10 +108,15 @@ galleries:
     place: The Oculus, New York
     location: { lat: 40.7115, lng: -74.0113, precision: landmark }
     zh: { title: Oculus 车站, place: 纽约 Oculus }
-  - collection: Lands End
+  - collection: Lands End I
+    slug: lands-end   # the URL it was published under before Lands End II existed
     place: Lands End, San Francisco
     location: { lat: 37.7806, lng: -122.5115, precision: landmark }
-    zh: { title: 兰兹角, place: 旧金山兰兹角 }
+    zh: { title: 兰兹角 I, place: 旧金山兰兹角 }
+  - collection: Lands End II
+    place: Lands End, San Francisco
+    location: { lat: 37.7806, lng: -122.5115, precision: landmark }
+    zh: { title: 兰兹角 II, place: 旧金山兰兹角 }
   - collection: San Diego
     place: San Diego
     location: { lat: 32.7157, lng: -117.1611, precision: locality }
