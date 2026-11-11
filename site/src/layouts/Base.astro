@@ -51,6 +51,8 @@ const links = site.links ?? [];
         root.dataset.theme = pref === "light" || pref === "dark" ? pref : (tone === "dark" ? "dark" : sys);
         if (lang !== "en" && lang !== "zh") lang = /^zh\b/i.test(navigator.language || "") ? "zh" : "en";
         root.dataset.lang = lang; root.lang = lang === "zh" ? "zh-Hans" : "en";
+        // What arrives with motion stays unseen until page-motion.js starts it; if that never runs, it shows anyway.
+        root.dataset.pre = ""; setTimeout(function () { delete root.dataset.pre; }, 2000);
       })();
     </script>
   </head>

@@ -2,6 +2,7 @@
 import Icon from "./Icon.astro";
 ---
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer" data-zh-aria-label="看图">
+  <div class="lb-bg" id="lb-bg"></div>
   <div class="lb-stage" id="lb-stage">
   <button type="button" class="zone prev" data-lb-nav="-1" aria-label="Previous" data-zh-aria-label="上一张"><Icon name="left" size={28} /></button>
   <button type="button" class="zone next" data-lb-nav="1" aria-label="Next" data-zh-aria-label="下一张"><Icon name="right" size={28} /></button>

@@ -1,6 +1,7 @@
 // Theme: an explicit choice beats the page's tone, which beats the system setting.
 // Runs once (the index and topbar persist across client navigations) and re-applies after each swap.
 // Also marks images as loaded so they can fade in, and keeps the index's current item in sync.
+import "./page-motion.js";
 const root = document.documentElement;
 
 function apply() {
@@ -73,7 +74,9 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-side-close]") || e.target.closest(".side a[href]")) closeSide();
   if (!e.target.closest("[data-theme-toggle]")) return;
   const next = root.dataset.theme === "dark" ? "light" : "dark";
-  root.dataset.theme = next;
+  // The whole page cross-fades between the two, rather than snapping.
+  const flip = () => { root.dataset.theme = next; };
+  if (document.startViewTransition) document.startViewTransition(flip); else flip();
   try { localStorage.setItem("theme", next); } catch {}
 });
 

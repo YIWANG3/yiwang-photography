@@ -42,6 +42,7 @@ const data = lightbox ? {
   loading={loading}
   fetchpriority={fetchpriority}
   decoding="async"
+  style={`--ar:${(item.w / item.h).toFixed(4)}`}
   class={cls}
   {...data}
 />

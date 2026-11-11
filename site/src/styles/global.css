@@ -10,7 +10,12 @@
   --gap: clamp(16px, 2.4vw, 32px);
   --aside: 248px;
   --measure: 60ch;
-  --ease: cubic-bezier(.2, .7, .2, 1);
+  /* Motion: one curve and four lengths for the whole site. The rules are in scripts/motion.js. */
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --t-quick: .15s; /* a hover, a press */
+  --t-base: .26s;  /* a fade, a small change */
+  --t-move: .38s;  /* something crossing the screen */
+  --t-enter: .52s; /* content arriving */
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -46,7 +51,7 @@ svg { flex: none; }
 .index-label { display: block; width: max-content; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 400; } /* a link to All series, deliberately without a hover style */
 
 .series-list { display: grid; gap: 1px; font-size: 15px; }
-.series-list a { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; color: var(--muted); padding: 5px 0; transition: color .15s; position: relative; }
+.series-list a { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; color: var(--muted); padding: 5px 0; transition: color var(--t-quick); position: relative; }
 .series-list .n { font-variant-numeric: tabular-nums; font-weight: 300; font-size: 12.5px; }
 .series-list a[aria-current="page"] { color: var(--fg); }
 .series-list a[aria-current="page"]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 2px; border-radius: 1px; background: var(--fg); }
@@ -54,21 +59,21 @@ svg { flex: none; }
 
 .index-foot { flex: none; display: grid; gap: 18px; }
 .pages { display: grid; gap: 7px; font-size: 12px; letter-spacing: .03em; color: var(--muted); }
-.pages a { transition: color .15s; width: max-content; }
+.pages a { transition: color var(--t-quick); width: max-content; }
 .pages a[aria-current="page"], .pages a:hover { color: var(--fg); }
 .elsewhere { display: grid; gap: 8px; font-size: 12px; letter-spacing: .03em; color: var(--muted); padding-top: 14px; border-top: 1px solid var(--line); }
-.elsewhere a { display: inline-flex; align-items: center; gap: 9px; width: max-content; transition: color .15s; }
+.elsewhere a { display: inline-flex; align-items: center; gap: 9px; width: max-content; transition: color var(--t-quick); }
 .elsewhere a:hover { color: var(--fg); }
 .index-foot .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .index-foot .row .theme-toggle { flex: none; }
 .row-ctl { display: inline-flex; align-items: center; gap: 14px; flex: none; }
-.lang-switch { display: block; width: max-content; text-align: left; margin-top: -6px; font-size: 12px; letter-spacing: .03em; color: var(--muted); transition: color .15s; cursor: pointer; }
+.lang-switch { display: block; width: max-content; text-align: left; margin-top: -6px; font-size: 12px; letter-spacing: .03em; color: var(--muted); transition: color var(--t-quick); cursor: pointer; }
 html[data-lang="zh"] [data-l="en"], html:not([data-lang="zh"]) [data-l="zh"] { display: none !important; }
 .lang-switch:hover { color: var(--fg); }
 .copyright { font-size: 10px; font-weight: 300; color: var(--muted); white-space: nowrap; }
 
-.theme-toggle { width: 28px; height: 28px; margin: -6px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--muted); transition: color .15s, background-color .15s; }
-.theme-toggle > svg { grid-area: 1 / 1; transition: opacity .2s, transform .3s var(--ease); }
+.theme-toggle { width: 28px; height: 28px; margin: -6px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--muted); transition: color var(--t-quick), background-color var(--t-quick); }
+.theme-toggle > svg { grid-area: 1 / 1; transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease); }
 .theme-toggle:hover { color: var(--fg); background: var(--hover); }
 .theme-toggle .ic-moon { opacity: 0; transform: rotate(-30deg) scale(.8); }
 :root[data-theme="dark"] .theme-toggle .ic-sun { opacity: 0; transform: rotate(30deg) scale(.8); }
@@ -90,9 +95,9 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
 
   /* Side panel: the archive index, slid in from the right (same side as the menu button). */
   .side { display: block; position: fixed; inset: 0; z-index: 40; pointer-events: none; }
-  .side-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); opacity: 0; transition: opacity .3s; }
+  .side-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); opacity: 0; transition: opacity var(--t-move) var(--ease); }
   .side-panel { position: absolute; top: 0; bottom: 0; right: 0; width: min(84vw, 380px); background: var(--bg); color: var(--fg); transform: translateX(104%);
-    transition: transform .34s var(--ease); display: flex; flex-direction: column; padding: calc(14px + env(safe-area-inset-top, 0px)) 24px calc(18px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 0 40px rgba(0, 0, 0, .18); }
+    transition: transform var(--t-move) var(--ease); display: flex; flex-direction: column; padding: calc(14px + env(safe-area-inset-top, 0px)) 24px calc(18px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 0 40px rgba(0, 0, 0, .18); }
   .side[data-open] { pointer-events: auto; }
   .side[data-open] .side-backdrop { opacity: 1; }
   .side[data-open] .side-panel { transform: none; }
@@ -126,10 +131,10 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
 .cover .ph { aspect-ratio: 4 / 3; position: relative; }
 /* The image is laid over the frame (so its intrinsic size cannot stretch the box) and letterboxes itself
    inside it; the frame is the page itself, drop-shadow follows the picture. */
-.cover img { position: absolute; inset: 7%; width: 86%; height: 86%; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .16)); transition: transform .7s var(--ease); }
+.cover img { position: absolute; inset: 7%; width: 86%; height: 86%; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .16)); transition: transform var(--t-enter) var(--ease); }
 /* A wall label under each frame: title, then count and year, centred. */
 .cover .t { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 10px; row-gap: 2px; font-size: 13px; text-align: center; }
-.cover .t .name { transition: color .15s; }
+.cover .t .name { transition: color var(--t-quick); }
 .cover .t .n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 300; font-size: 12px; }
 @media (hover: hover) { .cover:hover img { transform: scale(1.025); } }
 
@@ -141,14 +146,16 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
 .series-head .desc { font-size: 14px; font-weight: 300; margin-top: 8px; }
 .flow { display: grid; gap: clamp(32px, 6vw, 80px); justify-items: center; }
 .fig { display: grid; gap: 10px; justify-items: center; width: 100%; max-width: 1400px; }
-.fig img { max-height: min(88dvh, 1100px); width: auto; max-width: 100%; cursor: zoom-in; background: var(--line); }
+/* As wide as the column, or as wide as its height limit allows (--ar is the picture's width / height): the box has
+   its final size before the file arrives, so nothing below it moves, and the picture has a place to travel to. */
+.fig img { width: min(100%, calc(min(88dvh, 1100px) * var(--ar, 1.5))); height: auto; cursor: zoom-in; background: var(--line); }
 .fig figcaption { font-size: 12px; font-weight: 300; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; text-align: center; }
 .fig figcaption .n { color: var(--fg); font-weight: 400; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); width: 100%; max-width: 1400px; align-items: start; }
-.pair .fig img { max-height: none; width: 100%; }
+.pair .fig img { width: 100%; }
 @media (max-width: 640px) { .pair { grid-template-columns: 1fr; gap: clamp(32px, 7vw, 88px); } }
 .series-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: clamp(40px, 8vw, 96px); font-size: 13px; color: var(--muted); max-width: 1400px; margin-inline: auto; width: 100%; padding-top: 18px; border-top: 1px solid var(--line); }
-.series-foot a { display: inline-flex; align-items: center; gap: 8px; transition: color .15s; }
+.series-foot a { display: inline-flex; align-items: center; gap: 8px; transition: color var(--t-quick); }
 .series-foot a:hover { color: var(--fg); }
 .series-foot .next { justify-self: end; text-align: right; }
 .series-foot .k { display: block; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; font-weight: 400; }
@@ -157,7 +164,7 @@ main { padding: clamp(22px, 3.2vh, 40px) var(--gutter) clamp(48px, 8vw, 96px) cl
 
 /* Images settle in rather than pop. */
 img[loading] { opacity: 1; }
-.fig img, .cover img, .grid img { transition: opacity .5s var(--ease), transform .7s var(--ease); }
+.fig img, .cover img, .grid img { transition: opacity var(--t-enter) var(--ease), transform var(--t-enter) var(--ease); }
 .fig img:not(.is-loaded), .cover img:not(.is-loaded), .grid img:not(.is-loaded) { opacity: 0; }
 
 /* Recent + about */
@@ -175,10 +182,14 @@ img[loading] { opacity: 1; }
 .page-title { font-size: clamp(24px, 2.4vw, 30px); font-weight: 500; letter-spacing: 0; margin-bottom: clamp(18px, 3vw, 32px); }
 
 /* Lightbox: black regardless of theme; the photo is the only light source. */
-.lb { position: fixed; inset: 0; z-index: 50; background: #000; color: #c9c9c9; display: none; grid-template-rows: minmax(0, 1fr) auto; }
+.lb { position: fixed; inset: 0; z-index: 50; color: #c9c9c9; display: none; grid-template-rows: minmax(0, 1fr) auto; }
 .lb[data-open] { display: grid; }
+/* The black is its own layer, so it can come and go while the photograph travels between the page and the viewer. */
+.lb-bg { position: absolute; inset: 0; background: #000; }
+.lb[data-closing] { pointer-events: none; }
+.lb[data-moving] .lb-stage { overflow: visible; }
 .lb-stage { min-width: 0; min-height: 0; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; }
-.lb img { flex: none; max-width: none; max-height: none; object-fit: contain; transform-origin: center; transition: filter .4s var(--ease); cursor: zoom-in; user-select: none; -webkit-user-drag: none; }
+.lb img { flex: none; max-width: none; max-height: none; object-fit: contain; transform-origin: center; transition: filter var(--t-enter) var(--ease); cursor: zoom-in; user-select: none; -webkit-user-drag: none; }
 .lb[data-zoomed] .lb-stage, .lb[data-zoomed] img { cursor: grab; }
 .lb[data-dragging] .lb-stage, .lb[data-dragging] img { cursor: grabbing; }
 .lb .zoom { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 56px; z-index: 5; }
@@ -187,6 +198,8 @@ img[loading] { opacity: 1; }
 .lb[data-zoomed] .ic-zoom-out { display: block; }
 .lb[data-zoomed] .zone { display: none; }
 .lb img.is-loading { filter: blur(16px); transition: none; } /* the small rung while the preview decodes */
+.lb img.is-loading.is-arriving { transition: filter var(--t-move) var(--ease); } /* grown from its thumbnail: it softens on the way instead of starting blurred */
+.lb img.lb-ghost { pointer-events: none; } /* the photograph being paged away from */
 .lb .bar { position: relative; z-index: 3; background: #000; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px)); font-size: 12px; font-weight: 300; font-variant-numeric: tabular-nums; }
 .lb .bar .t { color: #eee; font-weight: 400; white-space: nowrap; }
 .lb .bar .t a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255, 255, 255, .35); }
@@ -194,17 +207,18 @@ img[loading] { opacity: 1; }
 .lb .bar .exif { color: #8f8f8f; display: flex; gap: 0 14px; flex-wrap: wrap; justify-content: center; }
 .lb .bar .exif span { white-space: nowrap; }
 .lb .bar .ctl { display: flex; gap: 2px; }
-.lb .ib { width: 34px; height: 34px; border-radius: 50%; display: inline-grid; place-items: center; color: #a8a8a8; transition: color .15s, background-color .15s; }
+.lb .ib { width: 34px; height: 34px; border-radius: 50%; display: inline-grid; place-items: center; color: #a8a8a8; transition: color var(--t-quick), background-color var(--t-quick); }
 .lb .ib:hover { color: #fff; background: rgba(255, 255, 255, .08); }
 .lb .close { z-index: 5; position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 12px; }
-.lb .zone { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); width: 48px; height: 80px; display: flex; align-items: center; padding: 0 10px; color: transparent; transition: color .2s; }
+.lb .zone { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); width: 48px; height: 80px; display: flex; align-items: center; padding: 0 10px; color: transparent; transition: color var(--t-quick); }
 .lb .zone.prev { left: 0; cursor: w-resize; justify-content: flex-start; } .lb .zone.next { right: 0; cursor: e-resize; justify-content: flex-end; }
 @media (hover: hover) { .lb .zone:hover { color: rgba(255, 255, 255, .7); } }
 .lb .zone svg { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .6)); }
 @media (max-width: 640px) { .lb .bar { flex-direction: column; align-items: flex-start; gap: 4px; } .lb .bar .ctl { display: none; } .lb .bar .exif { justify-content: flex-start; } .lb .zone { display: none; } }
 body[data-lb-open] { overflow: hidden; }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* Reduced motion: nothing travels or slides; things still fade, so a change is never a jump. */
+@media (prefers-reduced-motion: reduce) { :root { --t-move: 0s; } .cover:hover img { transform: none; } }
 
 /* Map page: the content column becomes the map; a strip of photos slides in at the bottom. */
 main:has(.map-page) { padding: 0; }
@@ -232,7 +246,17 @@ main:has(.map-page) { padding: 0; }
 
 /* Map / Satellite switch */
 .map-type { position: absolute; top: 14px; right: 14px; display: inline-flex; padding: 3px; border-radius: 8px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); box-shadow: 0 4px 16px rgba(0, 0, 0, .12); }
-.map-type button { font-size: 12px; padding: 5px 11px; border-radius: 6px; color: var(--muted); transition: color .15s, background-color .15s; }
+.map-type button { font-size: 12px; padding: 5px 11px; border-radius: 6px; color: var(--muted); transition: color var(--t-quick), background-color var(--t-quick); }
 .map-type button:hover { color: var(--fg); }
 .map-type button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 .map-page[data-map-type="hybrid"] .map-legend { background: rgba(0, 0, 0, .45); color: #ddd; }
+
+/* Motion on the page. Below the fold, a photograph waits unseen until it is scrolled to. */
+[data-rv] { opacity: 0; }
+/* A cover travels to its place at the head of the series (and back): one picture, moved, not two pages cross-fading. */
+::view-transition-group(flown) { animation-duration: var(--t-move); animation-timing-function: var(--ease); }
+::view-transition-old(flown), ::view-transition-new(flown) { width: 100%; height: 100%; object-fit: cover; animation-duration: var(--t-move); animation-timing-function: var(--ease); }
+/* One page giving way to the next, and light giving way to dark, are the same plain fade. */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--t-base) !important; animation-timing-function: var(--ease) !important; }
+/* What arrives with motion stays unseen until the script starts it (<html data-pre>, set in the head). */
+:root[data-pre] :is(main .series-head > *, main .page-title, main .fig, main .cover, main .grid > *) { opacity: 0; }
